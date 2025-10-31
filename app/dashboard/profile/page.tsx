@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
 import { showToast } from '../../../components/ui/toast'
+import { ProfilePictureUpload } from '../../../components/profile-picture-upload'
 
 interface Profile {
   id: string
@@ -336,41 +337,17 @@ export default function ProfilePage() {
             >
               {/* Top Row: Photo + Info + Actions */}
               <div className="flex items-start gap-6 mb-8">
-                {/* Profile Photo - BIGGER */}
-                <div className="relative group">
-                  <div 
-                    className="flex items-center justify-center text-white shadow-xl"
-                    style={{
-                      width: '112px',
-                      height: '112px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
-                      fontSize: '48px',
-                      fontWeight: 'bold',
-                      fontFamily: 'var(--font-bricolage), sans-serif'
+                {/* Profile Photo Upload */}
+                {profile && (
+                  <ProfilePictureUpload
+                    userId={profile.id}
+                    currentImageUrl={profile.featured_image_url}
+                    onUploadComplete={(url) => {
+                      setProfile({ ...profile, featured_image_url: url })
+                      setProfileCompletion(calculateCompletion({ ...profile, featured_image_url: url }))
                     }}
-                  >
-                    {profile?.full_name?.charAt(0).toUpperCase() || '?'}
-                  </div>
-                  <button 
-                    onClick={() => showToast('Photo upload coming soon!', 'info')}
-                    className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                    style={{
-                      border: '1px solid rgba(0,0,0,0.06)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#F8F9FB'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#FFFFFF'
-                    }}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#5E6370' }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </button>
-                </div>
+                  />
+                )}
 
                 {/* Info Column */}
                 <div className="flex-1">
@@ -1022,6 +999,10 @@ export default function ProfilePage() {
                         if (item.field === 'bio' || item.field === 'instagram_handle' || item.field === 'creator_niche' || item.field === 'follower_count_range') {
                           setActiveTab('about')
                           setEditing(true)
+                        } else if (item.field === 'featured_image_url') {
+                          // Scroll to top where profile picture is
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                          showToast('Click on your profile picture to upload!', 'info')
                         } else {
                           showToast(`${item.label} - Coming soon!`, 'info')
                         }
