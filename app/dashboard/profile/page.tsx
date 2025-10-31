@@ -342,6 +342,7 @@ export default function ProfilePage() {
                   <ProfilePictureUpload
                     userId={profile.id}
                     currentImageUrl={profile.featured_image_url}
+                    userName={profile.full_name}
                     onUploadComplete={(url) => {
                       setProfile({ ...profile, featured_image_url: url })
                       setProfileCompletion(calculateCompletion({ ...profile, featured_image_url: url }))

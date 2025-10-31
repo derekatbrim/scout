@@ -7,12 +7,14 @@ import { showToast } from './ui/toast'
 interface ProfilePictureUploadProps {
   userId: string
   currentImageUrl?: string
+  userName?: string
   onUploadComplete: (url: string) => void
 }
 
 export function ProfilePictureUpload({ 
   userId, 
-  currentImageUrl, 
+  currentImageUrl,
+  userName,
   onUploadComplete 
 }: ProfilePictureUploadProps) {
   const [uploading, setUploading] = useState(false)
@@ -111,7 +113,10 @@ export function ProfilePictureUpload({
               fontFamily: 'var(--font-bricolage), sans-serif'
             }}
           >
-            ?
+            {userName 
+              ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+              : userId.substring(0, 2).toUpperCase()
+            }
           </div>
         )}
 
@@ -120,7 +125,8 @@ export function ProfilePictureUpload({
           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150"
           style={{
             background: 'rgba(12,15,26,0.75)',
-            backdropFilter: 'blur(4px)'
+            backdropFilter: 'blur(4px)',
+            borderRadius: '50%'
           }}
         >
           {uploading ? (
