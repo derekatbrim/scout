@@ -21,9 +21,10 @@ export default function SignUpPage() {
     const supabase = supabaseClient()
 
     // Use environment variable or fallback to current origin
+    // Redirect to auth callback page which will handle session and redirect to dashboard
     const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
-      ? `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
-      : `${window.location.origin}/dashboard`
+      ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+      : `${window.location.origin}/auth/callback`
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
