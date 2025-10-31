@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
+/* Scout Design System - Tailwind v4 */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-bricolage: 'Bricolage Grotesque', sans-serif;
+  --font-libre: 'Libre Franklin', sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  /* Colors */
+  --color-scout-base: #F8F9FB;
+  --color-scout-surface: #FFFFFF;
+  --color-scout-text-primary: #0C0F1A;
+  --color-scout-text-secondary: #5E6370;
+  --color-scout-text-tertiary: #9CA3AF;
+  --color-scout-accent-pink: #FD8AE6;
+  --color-scout-accent-purple: #C77DFF;
+  --color-scout-navy: #0C0F1A;
+  
+  /* Shadows */
+  --shadow-scout-card: 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-scout-card-hover: 0 6px 14px rgba(0,0,0,0.06);
+  --shadow-scout-button: 0 2px 8px rgba(0,0,0,0.04);
+  
+  /* Border Radius */
+  --radius-scout: 16px;
+  --radius-scout-lg: 20px;
+  
+  /* Spacing */
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+  
+  /* Font families */
+  --font-family-heading: var(--font-bricolage), system-ui, sans-serif;
+  --font-family-body: var(--font-libre), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-scout-base);
+  color: var(--color-scout-text-primary);
+  font-family: var(--font-family-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+  color: var(--color-scout-text-primary);
+}
+
+/* Custom utility classes */
+.border-subtle {
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.hover-lift {
+  transition: all 0.15s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+
+.card-hover {
+  transition: all 0.15s ease-out;
+}
+
+.card-hover:hover {
+  transform: scale(1.01);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+  border-color: rgba(253,138,230,0.25) !important;
+}
+
+.bg-scout-gradient {
+  background: linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%);
+}
+
+.text-scout-gradient {
+  background: linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.15s ease-out;
 }
