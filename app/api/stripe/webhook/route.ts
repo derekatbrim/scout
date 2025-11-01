@@ -176,11 +176,19 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice
-        const subscriptionId = typeof invoice.subscription === 'string' 
-          ? invoice.subscription 
-          : invoice.subscription?.id
+        
+        // Safely extract subscription ID
+        let subscriptionId: string | null = null
+        if ('subscription' in invoice && invoice.subscription) {
+          subscriptionId = typeof invoice.subscription === 'string' 
+            ? invoice.subscription 
+            : invoice.subscription.id
+        }
 
-        if (!subscriptionId) break
+        if (!subscriptionId) {
+          console.log('ℹ️ Invoice has no subscription, skipping')
+          break
+        }
 
         // Get subscription to find user
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
@@ -193,12 +201,16 @@ export async function POST(request: NextRequest) {
 
         console.log('💰 Payment succeeded for user:', userId)
 
+        // Determine tier from price
+        const priceId = subscription.items.data[0]?.price.id || ''
+        const tier = priceId.toLowerCase().includes('premium') ? 'premium' : 'pro'
+
         // If this was the first payment after trial, update to paid
         const { error } = await supabaseAdmin
           .from('profiles')
           .update({
             subscription_status: 'active',
-            subscription_tier: subscription.items.data[0]?.price.id?.includes('premium') ? 'premium' : 'pro',
+            subscription_tier: tier,
             trial_ends_at: null, // Clear trial end date
           })
           .eq('id', userId)
@@ -206,18 +218,26 @@ export async function POST(request: NextRequest) {
         if (error) {
           console.error('❌ Error updating profile:', error)
         } else {
-          console.log('✅ Activated paid subscription')
+          console.log(`✅ Activated ${tier} subscription`)
         }
         break
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
-        const subscriptionId = typeof invoice.subscription === 'string' 
-          ? invoice.subscription 
-          : invoice.subscription?.id
+        
+        // Safely extract subscription ID
+        let subscriptionId: string | null = null
+        if ('subscription' in invoice && invoice.subscription) {
+          subscriptionId = typeof invoice.subscription === 'string' 
+            ? invoice.subscription 
+            : invoice.subscription.id
+        }
 
-        if (!subscriptionId) break
+        if (!subscriptionId) {
+          console.log('ℹ️ Invoice has no subscription, skipping')
+          break
+        }
 
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
         const userId = subscription.metadata.supabase_user_id
