@@ -9,6 +9,8 @@ import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
 import { showToast } from '../../../components/ui/toast'
 import { ProfilePictureUpload } from '../../../components/profile-picture-upload'
+import { PortfolioUpload } from '../../../components/portfolio-upload'
+import { PortfolioGrid } from '../../../components/portfolio-grid'
 
 interface Profile {
   id: string
@@ -55,6 +57,11 @@ export default function ProfilePage() {
   const [profileCompletion, setProfileCompletion] = useState(0)
   const [activeTab, setActiveTab] = useState<TabType>('work')
   
+  // Portfolio state
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [portfolioItems, setPortfolioItems] = useState<any[]>([])
+  const [loadingPortfolio, setLoadingPortfolio] = useState(false)
+  
   // Form state
   const [fullName, setFullName] = useState('')
   const [instagramHandle, setInstagramHandle] = useState('')
@@ -84,9 +91,26 @@ export default function ProfilePage() {
     '1M+',
   ]
 
-  const calculateCompletion = (prof: Profile) => {
+  const loadPortfolio = async (userId: string) => {
+    setLoadingPortfolio(true)
+    const { data, error } = await supabase
+      .from('portfolio_items')
+      .select('*')
+      .eq('user_id', userId)
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('Error loading portfolio:', error)
+    } else {
+      setPortfolioItems(data || [])
+    }
+    setLoadingPortfolio(false)
+  }
+
+  const calculateCompletion = (prof: Profile, portfolioCount: number = 0) => {
     let completed = 0
-    const total = 7
+    const total = 10  // Increased from 7 to include portfolio milestones
 
     if (prof.full_name) completed++
     if (prof.instagram_handle) completed++
@@ -94,38 +118,69 @@ export default function ProfilePage() {
     if (prof.follower_count_range) completed++
     if (prof.bio) completed++
     if (prof.featured_image_url) completed++
-    if (prof.portfolio_items && prof.portfolio_items.length > 0) completed++
+    
+    // Portfolio milestones
+    if (portfolioCount >= 1) completed++  // First upload
+    if (portfolioCount >= 3) completed++  // 3 items
+    if (portfolioCount >= 5) completed++  // 5 items (completionist!)
 
     return Math.round((completed / total) * 100)
   }
 
-  const getActionItems = (prof: Profile): ActionItem[] => {
-    return [
-      {
+  const getActionItems = (prof: Profile, portfolioCount: number = 0): ActionItem[] => {
+    const items: ActionItem[] = []
+    
+    if (!prof.featured_image_url) {
+      items.push({
         id: 'featured_image',
-        label: 'Add a featured image',
-        completed: !!prof.featured_image_url,
+        label: 'Add a profile picture',
+        completed: false,
         field: 'featured_image_url',
-      },
-      {
-        id: 'portfolio',
-        label: 'Add 4 pieces of work to your profile',
-        completed: prof.portfolio_items && prof.portfolio_items.length >= 4,
+      })
+    }
+    
+    if (portfolioCount === 0) {
+      items.push({
+        id: 'portfolio_first',
+        label: 'Upload your first portfolio item',
+        completed: false,
         field: 'portfolio_items',
-      },
-      {
+      })
+    } else if (portfolioCount < 3) {
+      items.push({
+        id: 'portfolio_3',
+        label: `Add ${3 - portfolioCount} more pieces to your portfolio`,
+        completed: false,
+        field: 'portfolio_items',
+      })
+    } else if (portfolioCount < 5) {
+      items.push({
+        id: 'portfolio_5',
+        label: `Add ${5 - portfolioCount} more for completionist status`,
+        completed: false,
+        field: 'portfolio_items',
+      })
+    }
+    
+    if (!prof.bio) {
+      items.push({
         id: 'bio',
         label: 'Add a profile bio',
-        completed: !!prof.bio,
+        completed: false,
         field: 'bio',
-      },
-      {
+      })
+    }
+    
+    if (!prof.instagram_handle) {
+      items.push({
         id: 'instagram',
         label: 'Connect your Instagram',
-        completed: !!prof.instagram_handle,
+        completed: false,
         field: 'instagram_handle',
-      },
-    ]
+      })
+    }
+    
+    return items
   }
 
   useEffect(() => {
@@ -151,8 +206,10 @@ export default function ProfilePage() {
         setCreatorNiche(profileData.creator_niche || '')
         setFollowerRange(profileData.follower_count_range || '')
         setBio(profileData.bio || '')
-        setProfileCompletion(calculateCompletion(profileData))
       }
+
+      // Load portfolio
+      await loadPortfolio(user.id)
 
       // Load deal stats
       const { data: deals } = await supabase
@@ -168,6 +225,16 @@ export default function ProfilePage() {
         const winRate = totalDeals > 0 ? Math.round((wonDeals / totalDeals) * 100) : 0
 
         setStats({ totalDeals, activeDeals, wonDeals, totalValue, winRate })
+      }
+
+      // Calculate completion after portfolio loads
+      const { data: portfolioData } = await supabase
+        .from('portfolio_items')
+        .select('id')
+        .eq('user_id', user.id)
+      
+      if (profileData) {
+        setProfileCompletion(calculateCompletion(profileData, portfolioData?.length || 0))
       }
 
       setLoading(false)
@@ -250,7 +317,7 @@ export default function ProfilePage() {
     )
   }
 
-  const actionItems = profile ? getActionItems(profile) : []
+  const actionItems = profile ? getActionItems(profile, portfolioItems.length) : []
   const incompleteItems = actionItems.filter(item => !item.completed)
 
   return (
@@ -550,46 +617,50 @@ export default function ProfilePage() {
               {/* Tab Content */}
               <div className="p-6">
                 {activeTab === 'work' && (
-                  <div className="text-center py-16">
-                    <div className="text-6xl mb-4">🎨</div>
-                    <h3 
-                      className="mb-2"
-                      style={{
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: '#0C0F1A',
-                        fontFamily: 'var(--font-bricolage), sans-serif'
-                      }}
-                    >
-                      Showcase your best work
-                    </h3>
-                    <p className="mb-6" style={{ color: '#5E6370', fontSize: '15px' }}>
-                      Upload brand collaborations, sponsored content, and your best-performing posts
-                    </p>
-                    <button
-                      onClick={() => showToast('Portfolio upload coming soon!', 'info')}
-                      className="px-6 py-3 text-white font-semibold transition-all cursor-pointer inline-flex items-center gap-2"
-                      style={{
-                        background: '#0C0F1A',
-                        borderRadius: '12px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
-                        e.currentTarget.style.transform = 'translateY(-1px)'
-                        e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#0C0F1A'
-                        e.currentTarget.style.transform = 'translateY(0)'
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'
-                      }}
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                      Add Work
-                    </button>
+                  <div>
+                    {/* Add Work Button */}
+                    <div className="flex justify-end mb-6">
+                      <button
+                        onClick={() => setShowUploadModal(true)}
+                        className="px-6 py-3 text-white font-semibold transition-all cursor-pointer inline-flex items-center gap-2"
+                        style={{
+                          background: '#0C0F1A',
+                          borderRadius: '12px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                          e.currentTarget.style.transform = 'translateY(-1px)'
+                          e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#0C0F1A'
+                          e.currentTarget.style.transform = 'translateY(0)'
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'
+                        }}
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Work
+                      </button>
+                    </div>
+
+                    {/* Portfolio Grid */}
+                    {loadingPortfolio ? (
+                      <div className="text-center py-16">
+                        <div className="text-4xl mb-4">⏳</div>
+                        <p style={{ color: '#5E6370', fontSize: '15px' }}>
+                          Loading your portfolio...
+                        </p>
+                      </div>
+                    ) : (
+                      <PortfolioGrid
+                        items={portfolioItems}
+                        isOwner={true}
+                        onUpdate={() => profile && loadPortfolio(profile.id)}
+                      />
+                    )}
                   </div>
                 )}
 
@@ -1004,6 +1075,10 @@ export default function ProfilePage() {
                           // Scroll to top where profile picture is
                           window.scrollTo({ top: 0, behavior: 'smooth' })
                           showToast('Click on your profile picture to upload!', 'info')
+                        } else if (item.field === 'portfolio_items') {
+                          // Open portfolio upload modal
+                          setActiveTab('work')
+                          setShowUploadModal(true)
                         } else {
                           showToast(`${item.label} - Coming soon!`, 'info')
                         }
@@ -1172,6 +1247,27 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Portfolio Upload Modal */}
+      {showUploadModal && profile && (
+        <PortfolioUpload
+          userId={profile.id}
+          onSuccess={async () => {
+            setShowUploadModal(false)
+            await loadPortfolio(profile.id)
+            
+            // Recalculate completion
+            const { data: portfolioData } = await supabase
+              .from('portfolio_items')
+              .select('id')
+              .eq('user_id', profile.id)
+            
+            setProfileCompletion(calculateCompletion(profile, portfolioData?.length || 0))
+            showToast('✨ Portfolio updated!', 'success')
+          }}
+          onClose={() => setShowUploadModal(false)}
+        />
+      )}
     </motion.div>
   )
 }
