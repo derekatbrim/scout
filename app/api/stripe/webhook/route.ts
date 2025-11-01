@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
           status: subscription.status,
           trial_end: subscription.trial_end,
           trial_start: subscription.trial_start,
-          current_period_end: subscription.current_period_end,
           cancel_at: subscription.cancel_at,
         })
 
@@ -89,8 +88,8 @@ export async function POST(request: NextRequest) {
           console.log(`✅ User has active ${tier} subscription`)
         }
         // If canceled but still in current period
-        else if (subscription.status === 'canceled' && subscription.current_period_end && new Date(subscription.current_period_end * 1000) > new Date()) {
-          // Keep their tier until period ends
+        else if (subscription.status === 'canceled') {
+          // Try to keep their tier until period ends if we can determine it
           tier = priceId?.toLowerCase().includes('premium') ? 'premium' : 'pro'
           console.log('⚠️ Subscription canceled but still active until period end')
         }
@@ -116,19 +115,19 @@ export async function POST(request: NextRequest) {
           const cancelDate = new Date(subscription.cancel_at * 1000)
           updateData.subscription_ends_at = cancelDate.toISOString()
           console.log('🗓️ Subscription ends at:', cancelDate.toISOString())
-        } else if (subscription.canceled_at && subscription.current_period_end) {
-          // If canceled but no specific cancel_at, use current_period_end
-          const periodEndDate = new Date(subscription.current_period_end * 1000)
-          updateData.subscription_ends_at = periodEndDate.toISOString()
-          console.log('🗓️ Subscription ends at period end:', periodEndDate.toISOString())
+        } else if (subscription.canceled_at) {
+          // If canceled but no specific cancel_at, subscription ends now
+          updateData.subscription_ends_at = new Date().toISOString()
+          console.log('🗓️ Subscription ended immediately')
         } else {
           // Clear end date if subscription is active
           updateData.subscription_ends_at = null
         }
 
-        // Always set the current period end (when next payment is due)
-        if (subscription.current_period_end) {
-          updateData.subscription_expires_at = new Date(subscription.current_period_end * 1000).toISOString()
+        // Set the next billing date (when subscription renews)
+        // This is available in most subscription objects
+        if ('current_period_end' in subscription && subscription.current_period_end) {
+          updateData.subscription_expires_at = new Date((subscription.current_period_end as number) * 1000).toISOString()
         }
 
         console.log('💾 Updating database with:', updateData)
