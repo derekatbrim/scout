@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     console.log('💳 Creating checkout session...')
     
-    // Create checkout session
+    // Create checkout session with 14-day trial
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?payment=success`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing?payment=canceled`,
       subscription_data: {
-        trial_period_days: 14,
+        trial_period_days: 14, // CRITICAL: 14-day free trial
         metadata: {
           supabase_user_id: userId,
         },
@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
     })
 
     console.log('✅ Checkout session created:', session.id)
+    console.log('🎁 Trial period: 14 days (ends at billing period start)')
 
     return NextResponse.json({ 
       sessionId: session.id, 
