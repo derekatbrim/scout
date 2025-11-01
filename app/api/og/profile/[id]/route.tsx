@@ -1,13 +1,13 @@
 import { ImageResponse } from 'next/og'
-import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await props.params
     const userId = params.id
 
     // Fetch profile data
