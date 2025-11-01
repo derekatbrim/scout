@@ -4,10 +4,11 @@ import { cookies } from 'next/headers'
 import PublicProfileClient from './client'
 
 interface Props {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!profile) {
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     profile.bio ||
     `${profile.full_name} is a ${profile.creator_niche || 'content creator'} available for brand collaborations. View portfolio and get in touch.`
 
-  const ogImageUrl = `https://scout-social.com/api/og/profile/${params.id}`
+  const ogImageUrl = `https://scout-social.com/api/og/profile/${id}`
 
   return {
     title,
@@ -47,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      url: `https://scout-social.com/profile/${params.id}`,
+      url: `https://scout-social.com/profile/${id}`,
       siteName: 'Scout',
       images: [
         {
@@ -68,11 +69,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       creator: profile.instagram_handle ? `@${profile.instagram_handle}` : undefined,
     },
     alternates: {
-      canonical: `https://scout-social.com/profile/${params.id}`,
+      canonical: `https://scout-social.com/profile/${id}`,
     },
   }
 }
 
-export default function PublicProfilePage({ params }: Props) {
-  return <PublicProfileClient params={params} />
+export default async function PublicProfilePage({ params }: Props) {
+  const resolvedParams = await params
+  return <PublicProfileClient params={resolvedParams} />
 }
