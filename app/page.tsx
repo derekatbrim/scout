@@ -756,30 +756,27 @@ export default function LandingPage() {
                   ))}
                 </ul>
               </div>
-              <div className="order-first lg:order-last">
-                <div className="overflow-hidden">
+              <div className="order-first lg:order-last w-full">
+                <div className="w-full overflow-hidden">
                   <div
-                    className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0"
+                    className="overflow-x-auto scrollbar-hide"
                     style={{
-                      scrollbarWidth: 'none',
-                      msOverflowStyle: 'none',
+                      WebkitOverflowScrolling: 'touch',
                     }}
                   >
                     <div
+                      className="inline-flex w-full min-w-full"
                       style={{
                         background: 'linear-gradient(135deg, rgba(199,125,255,0.08) 0%, rgba(59,130,246,0.04) 100%)',
                         border: '1px solid rgba(199,125,255,0.3)',
                         borderRadius: '16px',
-                        padding: 'clamp(14px, 3vw, 20px)',
+                        padding: 'clamp(12px, 3vw, 20px)',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-                        display: 'flex',
                         gap: 'clamp(8px, 2vw, 12px)',
-                        minWidth: 'fit-content',
-                        maxWidth: '100%',
                       }}
                     >
                       {['Prospect', 'Pitched', 'Won'].map((stage) => (
-                        <div key={stage} style={{ minWidth: 'clamp(120px, 22vw, 170px)', maxWidth: '180px' }}>
+                        <div key={stage} className="flex-1" style={{ minWidth: '105px', maxWidth: '200px' }}>
                           <div
                             style={{
                               fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
@@ -791,21 +788,21 @@ export default function LandingPage() {
                           >
                             {stage}
                           </div>
-                          <div className="space-y-2.5 sm:space-y-3">
+                          <div className="space-y-2.5">
                             {[1, 2].map((i) => (
                               <div
                                 key={i}
                                 style={{
                                   background: '#FFFFFF',
                                   border: '1px solid rgba(0,0,0,0.04)',
-                                  borderRadius: '12px',
+                                  borderRadius: '10px',
                                   padding: 'clamp(8px, 2vw, 10px)',
                                 }}
                               >
                                 <div
                                   style={{
-                                    width: 'clamp(28px, 6vw, 32px)',
-                                    height: 'clamp(28px, 6vw, 32px)',
+                                    width: 'clamp(24px, 6vw, 32px)',
+                                    height: 'clamp(24px, 6vw, 32px)',
                                     borderRadius: '8px',
                                     background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
                                     marginBottom: '6px',
@@ -814,7 +811,7 @@ export default function LandingPage() {
                                 <div
                                   style={{
                                     width: '80%',
-                                    height: '6px',
+                                    height: '5px',
                                     background: 'rgba(12,15,26,0.08)',
                                     borderRadius: '9999px',
                                     marginBottom: '4px',
@@ -823,7 +820,7 @@ export default function LandingPage() {
                                 <div
                                   style={{
                                     width: '55%',
-                                    height: '6px',
+                                    height: '5px',
                                     background: 'rgba(12,15,26,0.04)',
                                     borderRadius: '9999px',
                                   }}
@@ -837,8 +834,12 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <style jsx>{`
-                  div::-webkit-scrollbar {
+                  .scrollbar-hide::-webkit-scrollbar {
                     display: none;
+                  }
+                  .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                   }
                 `}</style>
               </div>
