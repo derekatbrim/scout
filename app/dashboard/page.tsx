@@ -995,7 +995,7 @@ export default function DashboardPage() {
               className="relative overflow-hidden"
               style={{
                 borderRadius: '16px',
-                minHeight: '500px'
+                minHeight: '600px'
               }}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1005,61 +1005,78 @@ export default function DashboardPage() {
               <div 
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  filter: 'blur(8px)',
-                  opacity: 0.4
+                  filter: 'blur(10px)',
+                  opacity: 0.3
                 }}
               >
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', height: '200px' }} />
-                  <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', height: '200px' }} />
+                <div className="grid md:grid-cols-2 gap-6 p-6">
+                  <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', height: '220px' }} />
+                  <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '24px', height: '220px' }} />
                 </div>
-                <div className="mt-6" style={{ background: '#FFFFFF', borderRadius: '16px', padding: '28px', height: '300px' }} />
+                <div className="px-6" style={{ background: '#FFFFFF', borderRadius: '16px', padding: '28px', height: '320px', marginTop: '24px' }} />
               </div>
 
               {/* Frosted Glass Overlay */}
               <div 
-                className="absolute inset-0 flex items-center justify-center"
+                className="absolute inset-0 flex items-center justify-center p-6"
                 style={{
-                  background: 'rgba(255,255,255,0.85)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)'
+                  background: 'rgba(248,249,251,0.92)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)'
                 }}
               >
-                <div className="text-center max-w-md px-6">
+                <div className="text-center w-full" style={{ maxWidth: '520px' }}>
                   {/* Lock Icon */}
                   <motion.div
-                    className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+                    className="mx-auto mb-6 flex items-center justify-center"
                     style={{
+                      width: '88px',
+                      height: '88px',
+                      borderRadius: '22px',
                       background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
-                      boxShadow: '0 8px 24px rgba(253,138,230,0.3)'
+                      boxShadow: '0 12px 32px rgba(253,138,230,0.35)'
                     }}
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.3, delay: 0.1 }}
+                    transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
                   >
-                    <svg className="w-10 h-10" style={{ color: '#FFFFFF' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-11 h-11" style={{ color: '#FFFFFF' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </motion.div>
 
-                  <h3 
+                  <motion.h3 
                     className="mb-3"
                     style={{
-                      fontSize: '1.75rem',
+                      fontSize: '2rem',
                       fontWeight: 700,
                       color: '#0C0F1A',
-                      fontFamily: 'var(--font-bricolage), sans-serif'
+                      fontFamily: 'var(--font-bricolage), sans-serif',
+                      lineHeight: 1.2
                     }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
                   >
                     Unlock Advanced Insights
-                  </h3>
+                  </motion.h3>
                   
-                  <p className="mb-6" style={{ color: '#5E6370', lineHeight: 1.6 }}>
+                  <motion.p 
+                    className="mb-8" 
+                    style={{ 
+                      color: '#5E6370', 
+                      lineHeight: 1.7,
+                      fontSize: '1rem'
+                    }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.25 }}
+                  >
                     Get AI-powered recommendations, revenue projections, optimal pitch timing, and industry benchmarks to land more deals
-                  </p>
+                  </motion.p>
 
                   {/* Features List */}
-                  <div className="space-y-3 mb-8 text-left">
+                  <div className="space-y-3.5 mb-8 text-left">
                     {[
                       'Revenue projections (30d & 90d)',
                       'Optimal pitch timing insights',
@@ -1070,16 +1087,21 @@ export default function DashboardPage() {
                     ].map((feature, i) => (
                       <motion.div
                         key={feature}
-                        className="flex items-center gap-3"
+                        className="flex items-center gap-3.5"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: 0.2 + (i * 0.05) }}
+                        transition={{ duration: 0.3, delay: 0.3 + (i * 0.05) }}
                       >
                         <div 
-                          className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={{ background: 'rgba(253,138,230,0.12)' }}
+                          className="flex items-center justify-center flex-shrink-0"
+                          style={{ 
+                            width: '22px',
+                            height: '22px',
+                            borderRadius: '9999px',
+                            background: 'rgba(253,138,230,0.15)'
+                          }}
                         >
-                          <svg className="w-3 h-3" style={{ color: '#FD8AE6' }} fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-3.5 h-3.5" style={{ color: '#FD8AE6' }} fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                           </svg>
                         </div>
@@ -1093,17 +1115,22 @@ export default function DashboardPage() {
                   {/* CTA Button */}
                   <Link href="/pricing">
                     <motion.button
-                      className="w-full text-base font-semibold px-8 py-4 transition-all"
+                      className="w-full font-semibold transition-all"
                       style={{
                         background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
                         color: '#FFFFFF',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 12px rgba(253,138,230,0.3)',
-                        cursor: 'pointer'
+                        borderRadius: '14px',
+                        boxShadow: '0 4px 14px rgba(253,138,230,0.35)',
+                        cursor: 'pointer',
+                        padding: '16px 32px',
+                        fontSize: '1rem'
                       }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.6 }}
                       whileHover={{
                         scale: 1.02,
-                        boxShadow: '0 6px 16px rgba(253,138,230,0.4)'
+                        boxShadow: '0 6px 20px rgba(253,138,230,0.45)'
                       }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -1111,9 +1138,15 @@ export default function DashboardPage() {
                     </motion.button>
                   </Link>
 
-                  <p className="mt-4 text-xs" style={{ color: '#9CA3AF' }}>
+                  <motion.p 
+                    className="mt-5 text-xs" 
+                    style={{ color: '#9CA3AF' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.7 }}
+                  >
                     Start your 7-day free trial • Cancel anytime
-                  </p>
+                  </motion.p>
                 </div>
               </div>
             </motion.div>
