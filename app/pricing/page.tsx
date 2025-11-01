@@ -5,11 +5,18 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabaseClient } from '@/lib/supabase'
+import { loadStripe } from '@stripe/stripe-js'
+import { showToast } from '@/components/ui/toast'
+
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual' | 'lifetime'>('annual')
   const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
   const router = useRouter()
   const supabase = supabaseClient()
 
@@ -17,10 +24,73 @@ export default function PricingPage() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+      
+      if (user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('subscription_tier')
+          .eq('id', user.id)
+          .single()
+        
+        setProfile(profileData)
+      }
+      
       setLoading(false)
     }
     checkUser()
   }, [supabase.auth])
+
+  const handleSubscribe = async (planName: string, priceId: string) => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    setCheckoutLoading(planName)
+
+    try {
+      const response = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          priceId: priceId,
+        }),
+      })
+
+      const { sessionId, url, error } = await response.json()
+
+      if (error) {
+        showToast(error, 'error')
+        setCheckoutLoading(null)
+        return
+      }
+
+      if (url) {
+        window.location.href = url
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error)
+      showToast('Something went wrong. Please try again.', 'error')
+      setCheckoutLoading(null)
+    }
+  }
+
+  // Map price IDs based on billing cycle
+  const getPriceId = (planName: string): string => {
+    // Replace these with your actual Stripe Price IDs
+    const priceIds = {
+      'Pro-monthly': process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY || 'price_pro_monthly',
+      'Pro-annual': process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_ANNUAL || 'price_pro_annual',
+      'Pro-lifetime': process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_LIFETIME || 'price_pro_lifetime',
+      'Premium-monthly': process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM_MONTHLY || 'price_premium_monthly',
+      'Premium-annual': process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM_ANNUAL || 'price_premium_annual',
+      'Premium-lifetime': process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM_LIFETIME || 'price_premium_lifetime',
+    }
+
+    const key = `${planName}-${billingCycle}` as keyof typeof priceIds
+    return priceIds[key] || ''
+  }
 
   const plans = [
     {
@@ -109,7 +179,7 @@ export default function PricingPage() {
                 scout
               </h1>
             </Link>
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-3 sm:gap-5">
               {loading ? (
                 <div 
                   style={{
@@ -123,7 +193,7 @@ export default function PricingPage() {
                 <>
                   <Link 
                     href="/dashboard"
-                    className="text-sm font-medium transition-colors"
+                    className="text-sm font-medium transition-colors hidden sm:block"
                     style={{ color: '#5E6370' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#0C0F1A'}
                     onMouseLeave={(e) => e.currentTarget.style.color = '#5E6370'}
@@ -137,7 +207,7 @@ export default function PricingPage() {
                     onMouseEnter={(e) => e.currentTarget.style.color = '#FD8AE6'}
                     onMouseLeave={(e) => e.currentTarget.style.color = '#5E6370'}
                   >
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </Link>
@@ -155,7 +225,7 @@ export default function PricingPage() {
                   </Link>
                   <button
                     onClick={() => router.push('/login')}
-                    className="text-sm font-semibold px-4 py-2 transition-all"
+                    className="text-sm font-semibold px-3 sm:px-4 py-2 transition-all"
                     style={{
                       background: '#0C0F1A',
                       color: '#FFFFFF',
@@ -184,7 +254,7 @@ export default function PricingPage() {
       </header>
 
       {/* Hero */}
-      <section className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 text-center">
+      <section className="pt-12 sm:pt-20 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8 text-center">
         <motion.div 
           className="max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
@@ -192,9 +262,9 @@ export default function PricingPage() {
           transition={{ duration: 0.4, delay: 0.1 }}
         >
           <h2 
-            className="mb-6"
+            className="mb-4 sm:mb-6"
             style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+              fontSize: 'clamp(2rem, 5vw, 4rem)',
               fontWeight: 700,
               color: '#0C0F1A',
               fontFamily: 'var(--font-bricolage), sans-serif',
@@ -204,12 +274,12 @@ export default function PricingPage() {
             Simple, transparent pricing
           </h2>
           <p 
-            className="mb-10"
+            className="mb-8 sm:mb-10"
             style={{
-              fontSize: '1.25rem',
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
               color: '#5E6370',
               maxWidth: '600px',
-              margin: '0 auto 2.5rem'
+              margin: '0 auto 2rem'
             }}
           >
             Start free, upgrade when you're ready. No hidden fees.
@@ -217,7 +287,7 @@ export default function PricingPage() {
 
           {/* Billing Toggle */}
           <div 
-            className="inline-flex items-center p-1.5 mb-12"
+            className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-0 p-1.5 mb-8 sm:mb-12 w-full sm:w-auto"
             style={{
               background: '#FFFFFF',
               border: '1px solid rgba(0,0,0,0.06)',
@@ -225,349 +295,292 @@ export default function PricingPage() {
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
             }}
           >
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className="px-6 py-3 rounded-lg font-medium transition-all relative"
-              style={{
-                background: billingCycle === 'monthly' ? '#0C0F1A' : 'transparent',
-                color: billingCycle === 'monthly' ? '#FFFFFF' : '#5E6370',
-                cursor: 'pointer',
-                fontSize: '0.95rem'
-              }}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingCycle('annual')}
-              className="px-6 py-3 rounded-lg font-medium transition-all relative"
-              style={{
-                background: billingCycle === 'annual' ? '#0C0F1A' : 'transparent',
-                color: billingCycle === 'annual' ? '#FFFFFF' : '#5E6370',
-                cursor: 'pointer',
-                fontSize: '0.95rem'
-              }}
-            >
-              Annual
-              <span 
-                className="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full"
+            {(['monthly', 'annual', 'lifetime'] as const).map((cycle) => (
+              <button
+                key={cycle}
+                onClick={() => setBillingCycle(cycle)}
+                className="flex-1 sm:flex-initial w-full sm:w-auto px-6 py-2.5 text-sm font-semibold rounded-xl transition-all"
                 style={{
-                  background: '#22C55E',
-                  color: '#FFFFFF'
+                  background: billingCycle === cycle ? '#0C0F1A' : 'transparent',
+                  color: billingCycle === cycle ? '#FFFFFF' : '#5E6370',
+                  cursor: 'pointer'
                 }}
               >
-                Save 17%
-              </span>
-            </button>
-            <button
-              onClick={() => setBillingCycle('lifetime')}
-              className="px-6 py-3 rounded-lg font-medium transition-all relative"
-              style={{
-                background: billingCycle === 'lifetime' ? '#0C0F1A' : 'transparent',
-                color: billingCycle === 'lifetime' ? '#FFFFFF' : '#5E6370',
-                cursor: 'pointer',
-                fontSize: '0.95rem'
-              }}
-            >
-              Lifetime
-              <span 
-                className="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full animate-pulse"
-                style={{
-                  background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
-                  color: '#FFFFFF'
-                }}
-              >
-                Limited
-              </span>
-            </button>
+                <span className="capitalize">{cycle}</span>
+                {cycle === 'annual' && (
+                  <span 
+                    className="ml-2 text-xs px-2 py-0.5 rounded-full"
+                    style={{
+                      background: billingCycle === cycle ? 'rgba(253,138,230,0.2)' : 'rgba(253,138,230,0.1)',
+                      color: billingCycle === cycle ? '#FFFFFF' : '#FD8AE6'
+                    }}
+                  >
+                    Save 17%
+                  </span>
+                )}
+                {cycle === 'lifetime' && (
+                  <span 
+                    className="ml-2 text-xs px-2 py-0.5 rounded-full"
+                    style={{
+                      background: billingCycle === cycle ? 'rgba(34,197,94,0.2)' : 'rgba(34,197,94,0.1)',
+                      color: billingCycle === cycle ? '#FFFFFF' : '#22C55E'
+                    }}
+                  >
+                    Best Value
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
-
-          {billingCycle === 'lifetime' && (
-            <motion.div 
-              className="mb-8 p-5 max-w-2xl mx-auto"
-              style={{
-                background: 'linear-gradient(135deg, rgba(253,138,230,0.08) 0%, rgba(199,125,255,0.08) 100%)',
-                border: '2px solid rgba(253,138,230,0.3)',
-                borderRadius: '16px'
-              }}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.25 }}
-            >
-              <p 
-                className="text-sm font-semibold"
-                style={{ color: '#0C0F1A' }}
-              >
-                🔥 Early Adopter Special: Pay once, use Scout forever. Limited to first 100 customers!
-              </p>
-            </motion.div>
-          )}
         </motion.div>
       </section>
 
       {/* Pricing Cards */}
-      <section className="pb-24 px-4 sm:px-6 lg:px-8">
+      <section className="pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-7">
-            {plans.map((plan, index) => (
-              <motion.div
-                key={plan.name}
-                className="relative"
-                style={{
-                  background: plan.highlighted 
-                    ? 'linear-gradient(145deg, #0C0F1A 0%, #1a1f2e 100%)' 
-                    : '#FFFFFF',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  boxShadow: plan.highlighted 
-                    ? '0 8px 24px rgba(0,0,0,0.12)' 
-                    : '0 4px 12px rgba(0,0,0,0.04)',
-                  border: plan.highlighted 
-                    ? '2px solid rgba(253,138,230,0.3)' 
-                    : '1px solid rgba(0,0,0,0.06)',
-                  transition: 'all 0.15s ease-out',
-                  cursor: 'pointer'
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.2 + (index * 0.1) }}
-                onMouseEnter={(e) => {
-                  if (!plan.highlighted) {
-                    e.currentTarget.style.transform = 'scale(1.01)'
-                    e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
-                    e.currentTarget.style.borderColor = 'rgba(253,138,230,0.25)'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!plan.highlighted) {
-                    e.currentTarget.style.transform = 'scale(1)'
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
-                    e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'
-                  }
-                }}
-              >
-                {/* Badge */}
-                {plan.highlighted && (
-                  <div 
-                    className="absolute -top-4 left-1/2 px-4 py-1.5 text-xs font-bold"
-                    style={{
-                      transform: 'translateX(-50%)',
-                      background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
-                      color: '#FFFFFF',
-                      borderRadius: '9999px',
-                      boxShadow: '0 4px 12px rgba(253,138,230,0.3)'
-                    }}
-                  >
-                    {plan.badge}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {plans.map((plan, index) => {
+              const price = plan.price[billingCycle]
+              const isCurrentPlan = profile?.subscription_tier === plan.name.toLowerCase()
+              
+              return (
+                <motion.div
+                  key={plan.name}
+                  className="flex flex-col"
+                  style={{
+                    background: '#FFFFFF',
+                    borderRadius: '20px',
+                    border: plan.highlighted ? '2px solid #FD8AE6' : '1px solid rgba(0,0,0,0.06)',
+                    boxShadow: plan.highlighted ? '0 8px 24px rgba(253,138,230,0.12)' : '0 4px 12px rgba(0,0,0,0.04)',
+                    padding: 'clamp(1.5rem, 4vw, 2rem)',
+                    position: 'relative',
+                    transform: plan.highlighted ? 'scale(1.05)' : 'scale(1)',
+                    transition: 'all 0.15s ease-out'
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1 * index }}
+                  whileHover={{ 
+                    transform: plan.highlighted ? 'scale(1.05) translateY(-4px)' : 'scale(1.02) translateY(-2px)',
+                    boxShadow: plan.highlighted ? '0 12px 32px rgba(253,138,230,0.18)' : '0 8px 20px rgba(0,0,0,0.08)'
+                  }}
+                >
+                  {/* Badge */}
+                  {plan.badge && (
+                    <div 
+                      className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 text-xs font-bold rounded-full whitespace-nowrap"
+                      style={{
+                        background: plan.badge === 'Limited Offer' 
+                          ? 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)'
+                          : 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
+                        color: '#FFFFFF',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      }}
+                    >
+                      {plan.badge}
+                    </div>
+                  )}
+
+                  {/* Plan Header */}
+                  <div className="text-center mb-6">
+                    <h3 
+                      className="text-sm font-semibold mb-2"
+                      style={{ 
+                        color: '#5E6370',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}
+                    >
+                      {plan.tagline}
+                    </h3>
+                    <h4 
+                      className="text-2xl sm:text-3xl font-bold mb-2"
+                      style={{
+                        color: '#0C0F1A',
+                        fontFamily: 'var(--font-bricolage), sans-serif'
+                      }}
+                    >
+                      {plan.name}
+                    </h4>
+                    <p className="text-sm" style={{ color: '#5E6370' }}>
+                      {plan.description}
+                    </p>
                   </div>
-                )}
 
-                {/* Plan Name */}
-                <h3 
-                  className="mb-1"
-                  style={{
-                    fontSize: '1.75rem',
-                    fontWeight: 700,
-                    color: plan.highlighted ? '#FFFFFF' : '#0C0F1A',
-                    fontFamily: 'var(--font-bricolage), sans-serif'
-                  }}
-                >
-                  {plan.name}
-                </h3>
-                
-                {/* Tagline */}
-                <p 
-                  className="text-xs font-semibold mb-4"
-                  style={{ 
-                    color: plan.highlighted ? '#FD8AE6' : '#5E6370' 
-                  }}
-                >
-                  {plan.tagline}
-                </p>
-                
-                {/* Description */}
-                <p 
-                  className="text-sm mb-8"
-                  style={{ 
-                    color: plan.highlighted ? 'rgba(255,255,255,0.7)' : '#5E6370' 
-                  }}
-                >
-                  {plan.description}
-                </p>
+                  {/* Price */}
+                  <div className="text-center mb-6 pb-6" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    <div className="flex items-baseline justify-center gap-2">
+                      <span 
+                        className="text-4xl sm:text-5xl font-bold"
+                        style={{
+                          color: plan.highlighted ? '#FD8AE6' : '#0C0F1A',
+                          fontFamily: 'var(--font-bricolage), sans-serif'
+                        }}
+                      >
+                        ${price}
+                      </span>
+                      {billingCycle !== 'lifetime' && (
+                        <span className="text-base" style={{ color: '#5E6370' }}>
+                          /{billingCycle === 'annual' ? 'year' : 'month'}
+                        </span>
+                      )}
+                    </div>
+                    {billingCycle === 'annual' && price > 0 && (
+                      <div className="text-sm mt-2" style={{ color: '#5E6370' }}>
+                        ${Math.round(price / 12)}/month billed annually
+                      </div>
+                    )}
+                    {billingCycle === 'lifetime' && price > 0 && (
+                      <div className="text-sm mt-2 font-semibold" style={{ color: '#22C55E' }}>
+                        Pay once, use forever
+                      </div>
+                    )}
+                  </div>
 
-                {/* Price */}
-                <div className="mb-8">
-                  <span 
+                  {/* Features */}
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <svg 
+                          className="w-5 h-5 flex-shrink-0 mt-0.5"
+                          style={{ color: plan.highlighted ? '#FD8AE6' : '#22C55E' }}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path 
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="text-sm" style={{ color: '#5E6370' }}>
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA Button */}
+                  <button
+                    onClick={() => {
+                      if (plan.name === 'Free') {
+                        router.push('/login')
+                      } else {
+                        handleSubscribe(plan.name, getPriceId(plan.name))
+                      }
+                    }}
+                    disabled={checkoutLoading === plan.name || isCurrentPlan}
+                    className="w-full py-3.5 text-sm font-semibold rounded-xl transition-all"
                     style={{
-                      fontSize: '3.5rem',
-                      fontWeight: 700,
-                      color: plan.highlighted ? '#FFFFFF' : '#0C0F1A',
-                      lineHeight: 1
+                      background: plan.highlighted 
+                        ? 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                        : isCurrentPlan
+                        ? '#E2E8F0'
+                        : '#0C0F1A',
+                      color: isCurrentPlan ? '#64748B' : '#FFFFFF',
+                      cursor: (checkoutLoading === plan.name || isCurrentPlan) ? 'not-allowed' : 'pointer',
+                      opacity: (checkoutLoading === plan.name || isCurrentPlan) ? 0.6 : 1,
+                      boxShadow: plan.highlighted ? '0 4px 12px rgba(253,138,230,0.3)' : '0 2px 8px rgba(0,0,0,0.04)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!checkoutLoading && !isCurrentPlan) {
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                        e.currentTarget.style.boxShadow = plan.highlighted 
+                          ? '0 8px 20px rgba(253,138,230,0.4)'
+                          : '0 6px 16px rgba(0,0,0,0.08)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = plan.highlighted 
+                        ? '0 4px 12px rgba(253,138,230,0.3)'
+                        : '0 2px 8px rgba(0,0,0,0.04)'
                     }}
                   >
-                    ${plan.price[billingCycle]}
-                  </span>
-                  {plan.price.monthly > 0 && (
-                    <span 
-                      className="text-sm ml-2"
-                      style={{ 
-                        color: plan.highlighted ? 'rgba(255,255,255,0.6)' : '#5E6370' 
-                      }}
-                    >
-                      {billingCycle === 'lifetime' ? 'one-time' : `/${billingCycle === 'monthly' ? 'mo' : 'yr'}`}
-                    </span>
-                  )}
-                  
-                  {billingCycle === 'annual' && plan.price.monthly > 0 && (
-                    <div 
-                      className="text-xs mt-2 font-medium"
-                      style={{ color: '#22C55E' }}
-                    >
-                      ${plan.price.monthly}/mo billed annually
-                    </div>
-                  )}
-                  
-                  {billingCycle === 'lifetime' && plan.price.monthly > 0 && (
-                    <div 
-                      className="text-xs mt-2 font-medium"
-                      style={{ 
-                        color: plan.highlighted ? '#FD8AE6' : '#5E6370' 
-                      }}
-                    >
-                      vs ${plan.price.monthly * 12 * 3}/3 years - Save ${(plan.price.monthly * 12 * 3) - plan.price.lifetime}!
-                    </div>
-                  )}
-                </div>
-
-                {/* CTA Button */}
-                <button
-                  onClick={() => router.push('/login')}
-                  className="w-full mb-8 px-5 py-3.5 rounded-xl font-semibold transition-all"
-                  style={{
-                    background: plan.highlighted 
-                      ? 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)' 
-                      : '#0C0F1A',
-                    color: '#FFFFFF',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                    fontSize: '0.95rem'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!plan.highlighted) {
-                      e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                    {checkoutLoading === plan.name 
+                      ? 'Processing...'
+                      : isCurrentPlan
+                      ? 'Current Plan'
+                      : plan.cta
                     }
-                    e.currentTarget.style.transform = 'translateY(-1px)'
-                    e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!plan.highlighted) {
-                      e.currentTarget.style.background = '#0C0F1A'
-                    }
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'
-                  }}
-                >
-                  {plan.cta}
-                </button>
-
-                {/* Features */}
-                <ul className="space-y-4">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <svg
-                        className="flex-shrink-0 mt-0.5"
-                        style={{
-                          width: '20px',
-                          height: '20px',
-                          color: plan.highlighted ? '#FD8AE6' : '#22C55E'
-                        }}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span 
-                        className="text-sm leading-relaxed"
-                        style={{ 
-                          color: plan.highlighted ? 'rgba(255,255,255,0.85)' : '#5E6370' 
-                        }}
-                      >
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
+                  </button>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* Social Proof for Lifetime */}
+      {/* Lifetime Deal CTA */}
       {billingCycle === 'lifetime' && (
         <motion.section 
-          className="pb-20 px-4 sm:px-6 lg:px-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.5 }}
+          className="pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
         >
           <div 
-            className="max-w-4xl mx-auto p-10 text-center"
+            className="max-w-4xl mx-auto p-6 sm:p-10 rounded-2xl text-center relative overflow-hidden"
             style={{
-              background: 'linear-gradient(145deg, #0C0F1A 0%, #1a1f2e 100%)',
-              borderRadius: '20px',
-              color: '#FFFFFF',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+              background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)',
+              boxShadow: '0 8px 24px rgba(34,197,94,0.25)'
             }}
           >
-            <h3 
-              className="mb-8"
+            {/* Decorative Elements */}
+            <div 
+              className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 rounded-full"
               style={{
-                fontSize: '2rem',
-                fontWeight: 700,
-                fontFamily: 'var(--font-bricolage), sans-serif'
+                background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)',
+                filter: 'blur(40px)',
+                transform: 'translate(30%, -30%)'
               }}
-            >
-              Why Lifetime Access?
-            </h3>
-            <div className="grid md:grid-cols-3 gap-8 text-sm">
-              <div>
-                <div className="text-4xl mb-3">💰</div>
-                <div 
-                  className="font-semibold mb-2"
-                  style={{ fontSize: '1.1rem' }}
-                >
-                  Massive Savings
-                </div>
-                <div style={{ color: 'rgba(255,255,255,0.7)' }}>
-                  Save thousands vs. paying monthly
-                </div>
+            />
+            
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  backdropFilter: 'blur(8px)'
+                }}
+              >
+                <span className="text-2xl">⚡</span>
+                <span className="text-sm font-bold" style={{ color: '#FFFFFF' }}>
+                  Limited Time Offer
+                </span>
               </div>
-              <div>
-                <div className="text-4xl mb-3">🔒</div>
-                <div 
-                  className="font-semibold mb-2"
-                  style={{ fontSize: '1.1rem' }}
-                >
-                  Price Lock
+              
+              <h3 
+                className="text-2xl sm:text-3xl font-bold mb-3"
+                style={{
+                  color: '#FFFFFF',
+                  fontFamily: 'var(--font-bricolage), sans-serif'
+                }}
+              >
+                Only 100 lifetime deals available
+              </h3>
+              <p className="text-base sm:text-lg mb-6" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                82 spots left • Once they're gone, they're gone forever
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                <div className="text-center">
+                  <div className="text-3xl sm:text-4xl font-bold" style={{ color: '#FFFFFF' }}>
+                    $490
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    One-time payment
+                  </div>
                 </div>
-                <div style={{ color: 'rgba(255,255,255,0.7)' }}>
-                  Never worry about price increases
+                <div className="text-2xl hidden sm:block" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  →
                 </div>
-              </div>
-              <div>
-                <div className="text-4xl mb-3">🚀</div>
-                <div 
-                  className="font-semibold mb-2"
-                  style={{ fontSize: '1.1rem' }}
-                >
-                  Support Indies
-                </div>
-                <div style={{ color: 'rgba(255,255,255,0.7)' }}>
-                  Help us build the best creator tool
+                <div className="text-center">
+                  <div className="text-3xl sm:text-4xl font-bold" style={{ color: '#FFFFFF' }}>
+                    Lifetime
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    Help us build the best creator tool
+                  </div>
                 </div>
               </div>
             </div>
@@ -577,14 +590,14 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <section 
-        className="py-24 px-4 sm:px-6 lg:px-8"
+        className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8"
         style={{ background: '#FFFFFF' }}
       >
         <div className="max-w-4xl mx-auto">
           <h3 
-            className="mb-12 text-center"
+            className="mb-8 sm:mb-12 text-center"
             style={{
-              fontSize: '2.5rem',
+              fontSize: 'clamp(2rem, 4vw, 2.5rem)',
               fontWeight: 700,
               color: '#0C0F1A',
               fontFamily: 'var(--font-bricolage), sans-serif'
@@ -593,7 +606,7 @@ export default function PricingPage() {
             Frequently asked questions
           </h3>
           
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {[
               {
                 q: "What happens when the Lifetime deal ends?",
@@ -613,12 +626,12 @@ export default function PricingPage() {
               },
               {
                 q: "Is there a free trial?",
-                a: "Our Free plan gives you access to core features with no time limit. Upgrade to Pro or Premium when you're ready for advanced features."
+                a: "Pro and Premium plans include a 14-day free trial - no credit card required. Cancel anytime before the trial ends at no charge."
               }
             ].map((faq, index) => (
               <motion.div
                 key={index}
-                className="p-6"
+                className="p-4 sm:p-6"
                 style={{
                   background: '#F8F9FB',
                   borderRadius: '16px',
@@ -626,19 +639,19 @@ export default function PricingPage() {
                 }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 * index }}
+                transition={{ duration: 0.3, delay: 0.05 * index }}
               >
                 <h4 
-                  className="mb-3"
+                  className="mb-2 sm:mb-3"
                   style={{
-                    fontSize: '1.1rem',
+                    fontSize: 'clamp(1rem, 2vw, 1.1rem)',
                     fontWeight: 600,
                     color: '#0C0F1A'
                   }}
                 >
                   {faq.q}
                 </h4>
-                <p style={{ color: '#5E6370', lineHeight: 1.6 }}>
+                <p style={{ color: '#5E6370', lineHeight: 1.6, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
                   {faq.a}
                 </p>
               </motion.div>
@@ -649,26 +662,34 @@ export default function PricingPage() {
 
       {/* CTA */}
       <section 
-        className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+        className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
         style={{
           background: 'linear-gradient(145deg, #0C0F1A 0%, #141925 100%)'
         }}
       >
         {/* Gradient Orbs */}
         <div 
-          className="absolute top-[-80px] right-[-80px]"
+          className="absolute -top-20 -right-20 sm:top-[-80px] sm:right-[-80px]"
           style={{
-            width: '330px',
-            height: '330px',
+            width: '200px',
+            height: '200px',
+            '@media (min-width: 640px)': {
+              width: '330px',
+              height: '330px'
+            },
             background: 'radial-gradient(circle, rgba(253,138,230,0.2) 0%, rgba(12,15,26,0) 70%)',
             filter: 'blur(40px)'
           }}
         />
         <div 
-          className="absolute bottom-[-120px] left-[-40px]"
+          className="absolute -bottom-24 -left-10 sm:bottom-[-120px] sm:left-[-40px]"
           style={{
-            width: '420px',
-            height: '420px',
+            width: '280px',
+            height: '280px',
+            '@media (min-width: 640px)': {
+              width: '420px',
+              height: '420px'
+            },
             background: 'radial-gradient(circle, rgba(199,125,255,0.22) 0%, rgba(12,15,26,0) 70%)',
             filter: 'blur(40px)'
           }}
@@ -676,9 +697,9 @@ export default function PricingPage() {
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h3 
-            className="mb-6"
+            className="mb-4 sm:mb-6"
             style={{
-              fontSize: '2.75rem',
+              fontSize: 'clamp(2rem, 4vw, 2.75rem)',
               fontWeight: 700,
               color: '#FFFFFF',
               fontFamily: 'var(--font-bricolage), sans-serif'
@@ -687,19 +708,19 @@ export default function PricingPage() {
             Ready to land more brand deals?
           </h3>
           <p 
-            className="mb-10"
+            className="mb-8 sm:mb-10"
             style={{
-              fontSize: '1.25rem',
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
               color: 'rgba(255,255,255,0.7)',
               maxWidth: '600px',
-              margin: '0 auto 2.5rem'
+              margin: '0 auto 2rem'
             }}
           >
             Join creators who are finding, pitching, and closing partnerships faster with Scout.
           </p>
           <button
             onClick={() => router.push('/login')}
-            className="px-10 py-4 text-base font-semibold transition-all"
+            className="px-8 sm:px-10 py-3 sm:py-4 text-sm sm:text-base font-semibold transition-all"
             style={{
               background: '#FFFFFF',
               color: '#0C0F1A',
@@ -727,7 +748,7 @@ export default function PricingPage() {
 
       {/* Footer */}
       <footer 
-        className="py-12 px-4 sm:px-6 lg:px-8"
+        className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
         style={{
           background: '#FFFFFF',
           borderTop: '1px solid rgba(0,0,0,0.06)'
@@ -735,7 +756,7 @@ export default function PricingPage() {
       >
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
+            <div className="text-center md:text-left">
               <h1 
                 className="text-2xl font-bold mb-2"
                 style={{
@@ -749,7 +770,7 @@ export default function PricingPage() {
                 Brand intelligence for creators
               </p>
             </div>
-            <div className="flex gap-8">
+            <div className="flex gap-6 sm:gap-8">
               <Link 
                 href="/" 
                 className="text-sm font-medium transition-colors"
@@ -780,7 +801,7 @@ export default function PricingPage() {
             </div>
           </div>
           <div 
-            className="mt-8 pt-8 text-center text-sm"
+            className="mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-sm"
             style={{
               borderTop: '1px solid rgba(0,0,0,0.06)',
               color: '#9CA3AF'
