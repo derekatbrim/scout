@@ -177,12 +177,11 @@ export async function POST(request: NextRequest) {
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice
         
-        // Safely extract subscription ID
-        let subscriptionId: string | null = null
+        // Safely extract subscription ID - it can be string or Subscription object
+        let subscriptionId: string | undefined
         if ('subscription' in invoice && invoice.subscription) {
-          subscriptionId = typeof invoice.subscription === 'string' 
-            ? invoice.subscription 
-            : invoice.subscription.id
+          const sub = invoice.subscription as string | Stripe.Subscription
+          subscriptionId = typeof sub === 'string' ? sub : sub.id
         }
 
         if (!subscriptionId) {
@@ -227,11 +226,10 @@ export async function POST(request: NextRequest) {
         const invoice = event.data.object as Stripe.Invoice
         
         // Safely extract subscription ID
-        let subscriptionId: string | null = null
+        let subscriptionId: string | undefined
         if ('subscription' in invoice && invoice.subscription) {
-          subscriptionId = typeof invoice.subscription === 'string' 
-            ? invoice.subscription 
-            : invoice.subscription.id
+          const sub = invoice.subscription as string | Stripe.Subscription
+          subscriptionId = typeof sub === 'string' ? sub : sub.id
         }
 
         if (!subscriptionId) {
