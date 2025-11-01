@@ -4,14 +4,20 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, priceId } = await request.json()
+    const body = await request.json()
+    console.log('📦 Received request body:', body)
+    
+    const { userId, priceId } = body
 
     if (!userId || !priceId) {
+      console.error('❌ Missing required fields:', { userId, priceId })
       return NextResponse.json(
         { error: 'Missing userId or priceId' },
         { status: 400 }
       )
     }
+
+    console.log('🔍 Looking up user:', userId)
 
     // Get user profile
     const { data: profile, error: profileError } = await supabaseAdmin
@@ -20,17 +26,23 @@ export async function POST(request: NextRequest) {
       .eq('id', userId)
       .single()
 
+    console.log('👤 Profile result:', { profile, profileError })
+
     if (profileError || !profile) {
+      console.error('❌ Profile error:', profileError)
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: 'User not found', details: profileError?.message },
         { status: 404 }
       )
     }
+
+    console.log('✅ Found user:', profile.email)
 
     // Check if customer exists in Stripe
     let customerId = profile.stripe_customer_id
 
     if (!customerId) {
+      console.log('🆕 Creating new Stripe customer for:', profile.email)
       // Create new Stripe customer
       const customer = await stripe.customers.create({
         email: profile.email,
@@ -39,14 +51,19 @@ export async function POST(request: NextRequest) {
         },
       })
       customerId = customer.id
+      console.log('✅ Created Stripe customer:', customerId)
 
       // Save customer ID to profile
       await supabaseAdmin
         .from('profiles')
         .update({ stripe_customer_id: customerId })
         .eq('id', userId)
+    } else {
+      console.log('✅ Using existing Stripe customer:', customerId)
     }
 
+    console.log('💳 Creating checkout session...')
+    
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -71,12 +88,14 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log('✅ Checkout session created:', session.id)
+
     return NextResponse.json({ 
       sessionId: session.id, 
       url: session.url 
     })
   } catch (error: any) {
-    console.error('Stripe checkout error:', error)
+    console.error('💥 Stripe checkout error:', error)
     return NextResponse.json(
       { error: error.message || 'Failed to create checkout session' },
       { status: 500 }
