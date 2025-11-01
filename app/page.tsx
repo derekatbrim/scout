@@ -186,13 +186,14 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              {/* Responsive Headline - Better mobile sizing */}
+              {/* Hero Headline - BIGGER and more prominent */}
               <h1 
-                className="font-bold mb-4 sm:mb-5 md:mb-6 leading-[1.15] sm:leading-[1.1]"
+                className="font-bold mb-4 sm:mb-5 md:mb-6 leading-[1.1] sm:leading-[1.05]"
                 style={{
-                  fontSize: 'clamp(2rem, 8vw, 4.5rem)',
+                  fontSize: 'clamp(2.25rem, 10vw, 5.5rem)',
                   color: '#0C0F1A',
                   fontFamily: 'var(--font-bricolage), sans-serif',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 Find brand deals.{' '}
@@ -755,75 +756,91 @@ export default function LandingPage() {
                   ))}
                 </ul>
               </div>
-              <div className="order-first lg:order-last overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                <div
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(199,125,255,0.08) 0%, rgba(59,130,246,0.04) 100%)',
-                    border: '1px solid rgba(199,125,255,0.3)',
-                    borderRadius: '16px',
-                    padding: 'clamp(14px, 3vw, 20px)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-                    display: 'flex',
-                    gap: 'clamp(10px, 2vw, 12px)',
-                    minWidth: 'max-content',
-                  }}
-                >
-                  {['Prospect', 'Pitched', 'Won'].map((stage) => (
-                    <div key={stage} style={{ minWidth: 'clamp(140px, 20vw, 170px)' }}>
-                      <div
-                        style={{
-                          fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-                          color: '#5E6370',
-                          marginBottom: '8px',
-                          textTransform: 'uppercase',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {stage}
-                      </div>
-                      <div className="space-y-2.5 sm:space-y-3">
-                        {[1, 2].map((i) => (
+              <div className="order-first lg:order-last">
+                <div className="overflow-hidden">
+                  <div
+                    className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0"
+                    style={{
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(199,125,255,0.08) 0%, rgba(59,130,246,0.04) 100%)',
+                        border: '1px solid rgba(199,125,255,0.3)',
+                        borderRadius: '16px',
+                        padding: 'clamp(14px, 3vw, 20px)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                        display: 'flex',
+                        gap: 'clamp(8px, 2vw, 12px)',
+                        minWidth: 'fit-content',
+                        maxWidth: '100%',
+                      }}
+                    >
+                      {['Prospect', 'Pitched', 'Won'].map((stage) => (
+                        <div key={stage} style={{ minWidth: 'clamp(120px, 22vw, 170px)', maxWidth: '180px' }}>
                           <div
-                            key={i}
                             style={{
-                              background: '#FFFFFF',
-                              border: '1px solid rgba(0,0,0,0.04)',
-                              borderRadius: '12px',
-                              padding: 'clamp(8px, 2vw, 10px)',
+                              fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                              color: '#5E6370',
+                              marginBottom: '8px',
+                              textTransform: 'uppercase',
+                              fontWeight: 600,
                             }}
                           >
-                            <div
-                              style={{
-                                width: 'clamp(28px, 6vw, 32px)',
-                                height: 'clamp(28px, 6vw, 32px)',
-                                borderRadius: '8px',
-                                background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
-                                marginBottom: '6px',
-                              }}
-                            />
-                            <div
-                              style={{
-                                width: '80%',
-                                height: '6px',
-                                background: 'rgba(12,15,26,0.08)',
-                                borderRadius: '9999px',
-                                marginBottom: '4px',
-                              }}
-                            />
-                            <div
-                              style={{
-                                width: '55%',
-                                height: '6px',
-                                background: 'rgba(12,15,26,0.04)',
-                                borderRadius: '9999px',
-                              }}
-                            />
+                            {stage}
                           </div>
-                        ))}
-                      </div>
+                          <div className="space-y-2.5 sm:space-y-3">
+                            {[1, 2].map((i) => (
+                              <div
+                                key={i}
+                                style={{
+                                  background: '#FFFFFF',
+                                  border: '1px solid rgba(0,0,0,0.04)',
+                                  borderRadius: '12px',
+                                  padding: 'clamp(8px, 2vw, 10px)',
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: 'clamp(28px, 6vw, 32px)',
+                                    height: 'clamp(28px, 6vw, 32px)',
+                                    borderRadius: '8px',
+                                    background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
+                                    marginBottom: '6px',
+                                  }}
+                                />
+                                <div
+                                  style={{
+                                    width: '80%',
+                                    height: '6px',
+                                    background: 'rgba(12,15,26,0.08)',
+                                    borderRadius: '9999px',
+                                    marginBottom: '4px',
+                                  }}
+                                />
+                                <div
+                                  style={{
+                                    width: '55%',
+                                    height: '6px',
+                                    background: 'rgba(12,15,26,0.04)',
+                                    borderRadius: '9999px',
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
+                <style jsx>{`
+                  div::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
               </div>
             </motion.div>
 
@@ -1238,9 +1255,9 @@ export default function LandingPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 disabled={loading}
-                className="flex-1 px-4 sm:px-5 text-sm sm:text-base"
+                className="flex-1 px-4 sm:px-5 py-3.5 sm:py-4 text-sm sm:text-base"
                 style={{
-                  height: '50px',
+                  height: '54px',
                   background: 'rgba(255,255,255,0.08)',
                   border: '1px solid rgba(255,255,255,0.12)',
                   borderRadius: '14px',
@@ -1260,13 +1277,12 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="text-sm sm:text-base font-semibold whitespace-nowrap"
+                className="text-sm sm:text-base font-semibold whitespace-nowrap px-6 sm:px-8 py-3.5 sm:py-4"
                 style={{
-                  height: '50px',
+                  height: '54px',
                   background: loading ? '#9CA3AF' : '#FFFFFF',
                   color: loading ? '#FFFFFF' : '#0C0F1A',
                   borderRadius: '14px',
-                  padding: '0 clamp(20px, 5vw, 32px)',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   transition: 'all 0.15s ease-out',
                   fontFamily: 'var(--font-libre), sans-serif',
