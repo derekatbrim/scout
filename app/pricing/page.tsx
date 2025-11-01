@@ -669,27 +669,19 @@ export default function PricingPage() {
       >
         {/* Gradient Orbs */}
         <div 
-          className="absolute -top-20 -right-20 sm:top-[-80px] sm:right-[-80px]"
+          className="absolute -top-20 -right-20 sm:-top-20 sm:-right-20"
           style={{
             width: '200px',
             height: '200px',
-            '@media (min-width: 640px)': {
-              width: '330px',
-              height: '330px'
-            },
             background: 'radial-gradient(circle, rgba(253,138,230,0.2) 0%, rgba(12,15,26,0) 70%)',
             filter: 'blur(40px)'
           }}
         />
         <div 
-          className="absolute -bottom-24 -left-10 sm:bottom-[-120px] sm:left-[-40px]"
+          className="absolute -bottom-24 -left-10 sm:-bottom-30 sm:-left-10"
           style={{
             width: '280px',
             height: '280px',
-            '@media (min-width: 640px)': {
-              width: '420px',
-              height: '420px'
-            },
             background: 'radial-gradient(circle, rgba(199,125,255,0.22) 0%, rgba(12,15,26,0) 70%)',
             filter: 'blur(40px)'
           }}
