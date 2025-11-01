@@ -54,6 +54,9 @@ export async function GET(
       return range.replace('k', 'K')
     }
 
+    // Create username from full name or use first name
+    const username = profile.full_name?.toLowerCase().replace(/\s+/g, '') || 'creator'
+
     return new ImageResponse(
       (
         <div
@@ -61,243 +64,123 @@ export async function GET(
             height: '100%',
             width: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: '#F8F9FB',
-            padding: '60px',
+            flexDirection: 'row',
+            backgroundColor: '#0C0F1A',
+            position: 'relative',
           }}
         >
-          {/* Scout Logo */}
+          {/* Left gradient bar */}
           <div
             style={{
               display: 'flex',
-              fontSize: '32px',
-              fontWeight: 'bold',
-              color: '#0C0F1A',
-              letterSpacing: '-0.02em',
-              marginBottom: '40px',
+              width: '24px',
+              background: 'linear-gradient(180deg, #FD8AE6 0%, #C77DFF 100%)',
             }}
-          >
-            scout
-          </div>
+          />
 
-          {/* Main Content */}
+          {/* Main content area */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: '40px',
+              flexDirection: 'column',
               flex: 1,
-              backgroundColor: '#FFFFFF',
-              borderRadius: '24px',
-              padding: '50px',
-              border: '2px solid rgba(0,0,0,0.06)',
+              padding: '60px 80px',
+              justifyContent: 'space-between',
             }}
           >
-            {/* Profile Picture */}
+            {/* Top - Scout logo in box */}
             <div
               style={{
                 display: 'flex',
-                flexShrink: 0,
+                alignItems: 'center',
               }}
             >
-              {profile.featured_image_url ? (
-                <img
-                  src={profile.featured_image_url}
-                  alt={profile.full_name}
-                  width={180}
-                  height={180}
-                  style={{
-                    borderRadius: '20px',
-                    objectFit: 'cover',
-                  }}
-                />
-              ) : (
+              <div
+                style={{
+                  display: 'flex',
+                  padding: '12px 24px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '8px',
+                  border: '2px solid rgba(255, 255, 255, 0.2)',
+                }}
+              >
                 <div
                   style={{
-                    width: '180px',
-                    height: '180px',
-                    borderRadius: '20px',
-                    background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FFFFFF',
-                    fontSize: '72px',
+                    fontSize: '24px',
                     fontWeight: 'bold',
+                    color: '#FFFFFF',
+                    letterSpacing: '-0.02em',
                   }}
                 >
-                  {profile.full_name?.charAt(0).toUpperCase() || 'C'}
+                  SCOUT
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* Info Column */}
+            {/* Middle - Main content */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                flex: 1,
+                gap: '24px',
               }}
             >
-              {/* Name */}
+              {/* Gradient slash + username */}
               <div
                 style={{
                   display: 'flex',
-                  fontSize: '56px',
-                  fontWeight: 'bold',
-                  color: '#0C0F1A',
-                  marginBottom: '8px',
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.02em',
+                  alignItems: 'baseline',
+                  gap: '8px',
                 }}
               >
-                {profile.full_name}
-              </div>
-
-              {/* Niche */}
-              <div
-                style={{
-                  display: 'flex',
-                  fontSize: '28px',
-                  color: '#5E6370',
-                  marginBottom: '12px',
-                }}
-              >
-                {profile.creator_niche || 'Content Creator'}
-              </div>
-
-              {/* Location */}
-              <div
-                style={{
-                  display: 'flex',
-                  fontSize: '22px',
-                  color: '#9CA3AF',
-                  marginBottom: '40px',
-                }}
-              >
-                📍 Crystal Lake, Illinois
-              </div>
-
-              {/* Stats */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '30px',
-                }}
-              >
-                {/* Earned */}
                 <div
                   style={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    padding: '20px 30px',
-                    backgroundColor: '#F8F9FB',
-                    borderRadius: '12px',
+                    fontSize: '120px',
+                    fontWeight: 'bold',
+                    background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
+                    backgroundClip: 'text',
+                    color: 'transparent',
+                    lineHeight: 1,
                   }}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: '36px',
-                      fontWeight: 'bold',
-                      color: '#0C0F1A',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    ${totalValue.toLocaleString()}
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: '16px',
-                      color: '#5E6370',
-                      fontWeight: '500',
-                    }}
-                  >
-                    Earned
-                  </div>
+                  /
                 </div>
-
-                {/* Collabs */}
                 <div
                   style={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    padding: '20px 30px',
-                    backgroundColor: '#F8F9FB',
-                    borderRadius: '12px',
+                    fontSize: '72px',
+                    fontWeight: 'bold',
+                    color: '#FFFFFF',
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1,
                   }}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: '36px',
-                      fontWeight: 'bold',
-                      color: '#0C0F1A',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    {wonDeals}
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: '16px',
-                      color: '#5E6370',
-                      fontWeight: '500',
-                    }}
-                  >
-                    Collabs
-                  </div>
+                  {username}
                 </div>
+              </div>
 
-                {/* Followers */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    padding: '20px 30px',
-                    backgroundColor: '#F8F9FB',
-                    borderRadius: '12px',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: '36px',
-                      fontWeight: 'bold',
-                      color: '#0C0F1A',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    {formatFollowerCount(profile.follower_count_range || '')}
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      fontSize: '16px',
-                      color: '#5E6370',
-                      fontWeight: '500',
-                    }}
-                  >
-                    Followers
-                  </div>
-                </div>
+              {/* CTA blurb */}
+              <div
+                style={{
+                  display: 'flex',
+                  fontSize: '32px',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  lineHeight: 1.4,
+                  maxWidth: '900px',
+                }}
+              >
+                {profile.creator_niche || 'Content creator'} available for brand collaborations. 
+                {wonDeals > 0 && ` ${wonDeals} successful partnership${wonDeals !== 1 ? 's' : ''}.`}
+                {totalValue > 0 && ` $${totalValue.toLocaleString()} earned.`}
+                {` ${formatFollowerCount(profile.follower_count_range || '')} followers.`}
               </div>
             </div>
-          </div>
 
-          {/* Bottom Accent */}
-          <div
-            style={{
-              display: 'flex',
-              marginTop: '30px',
-              height: '8px',
-              background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
-              borderRadius: '4px',
-            }}
-          />
+            {/* Bottom - spacer */}
+            <div style={{ display: 'flex' }} />
+          </div>
         </div>
       ),
       {
