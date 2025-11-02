@@ -45,6 +45,7 @@ export default function BrandsPage() {
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all')
   const [addingBrandId, setAddingBrandId] = useState<string | null>(null)
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
+  const [userTier, setUserTier] = useState<'free' | 'pro' | 'premium' | 'trial'>('free')
   const router = useRouter()
   const supabase = supabaseClient()
 
@@ -55,16 +56,38 @@ export default function BrandsPage() {
       router.push('/login')
       return
     }
-    loadBrands()
+    
+    // Fetch user profile to check subscription tier
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('subscription_tier')
+      .eq('id', user.id)
+      .single()
+    
+    // Determine tier (default to 'free' if not set)
+    const tier = profile?.subscription_tier || 'free'
+    setUserTier(tier)
+    
+    loadBrands(tier)
   }
   checkAuth()
 }, [router, supabase.auth])
 
-  const loadBrands = async () => {
-    const { data, error } = await supabase
+  const loadBrands = async (tier: 'free' | 'pro' | 'premium' | 'trial') => {
+    // Determine brand limit based on tier
+    const brandLimit = tier === 'free' ? 70 : null // Pro/Premium/Trial = unlimited
+    
+    let query = supabase
       .from('brands')
       .select('*')
       .order('name')
+    
+    // Apply limit for free tier
+    if (brandLimit) {
+      query = query.limit(brandLimit)
+    }
+    
+    const { data, error } = await query
 
     if (error) {
       console.error('Error loading brands:', error)
@@ -290,8 +313,15 @@ export default function BrandsPage() {
             </div>
           </div>
 
-          {/* Category Filters */}
-          <div className="px-8 py-6 scrollbar-hide overflow-x-auto" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+          {/* Category Filters - Enhanced with Contra-style effects */}
+          <div 
+            className="px-8 py-6 scrollbar-hide overflow-x-auto relative" 
+            style={{ 
+              borderBottom: '1px solid rgba(0,0,0,0.06)',
+              maskImage: 'linear-gradient(to right, black calc(100% - 80px), transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 80px), transparent 100%)'
+            }}
+          >
             <div className="flex items-center gap-3">
               {categories.map(cat => (
                 <button
@@ -302,37 +332,85 @@ export default function BrandsPage() {
                     borderRadius: '9999px',
                     background: selectedCategory === cat ? '#0C0F1A' : '#F8F9FB',
                     color: selectedCategory === cat ? '#FFFFFF' : '#0C0F1A',
-                    boxShadow: selectedCategory === cat ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
+                    boxShadow: selectedCategory === cat ? '0 2px 8px rgba(0,0,0,0.08)' : '0 1px 2px rgba(0,0,0,0.04)',
                     border: selectedCategory === cat ? 'none' : '1px solid rgba(0,0,0,0.06)',
                     cursor: 'pointer',
                     fontFamily: 'var(--font-libre), sans-serif'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedCategory !== cat) {
+                      e.currentTarget.style.background = '#FFFFFF'
+                      e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedCategory !== cat) {
+                      e.currentTarget.style.background = '#F8F9FB'
+                      e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)'
+                    }
                   }}
                 >
                   {cat === 'all' ? 'All Brands' : cat}
                 </button>
               ))}
             </div>
+            
+            {/* Fade gradient indicator on right */}
+            <div 
+              className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none"
+              style={{
+                background: 'linear-gradient(to left, rgba(248,249,251,1) 0%, transparent 100%)'
+              }}
+            />
           </div>
 
-          {/* Results Row */}
-          <div className="px-6 py-4 flex items-center justify-between" style={{ background: 'rgba(248,249,251,0.5)' }}>
-            <div className="flex items-center gap-3">
-              <span className="text-sm" style={{ color: '#5E6370', fontFamily: 'var(--font-libre), sans-serif' }}>
-                <span className="font-semibold" style={{ color: '#0C0F1A' }}>{filteredBrands.length}</span> {filteredBrands.length === 1 ? 'brand' : 'brands'}
-              </span>
-              {(searchTerm || selectedCategory !== 'all') && (
-                <>
-                  <span style={{ color: '#9CA3AF' }}>·</span>
-                  <button
-                    onClick={() => { setSearchTerm(''); setSelectedCategory('all') }}
-                    className="text-sm font-medium transition-colors"
-                    style={{ color: '#FD8AE6', cursor: 'pointer', fontFamily: 'var(--font-libre), sans-serif' }}
-                  >
-                    Clear all
-                  </button>
-                </>
-              )}
-            </div>
+          {/* Results Row with Tier Badge */}
+          <div className="px-6 py-3.5" style={{ background: 'rgba(248,249,251,0.8)', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-sm" style={{ color: '#5E6370', fontFamily: 'var(--font-libre), sans-serif' }}>
+                  <span className="font-semibold" style={{ color: '#0C0F1A' }}>{filteredBrands.length}</span> {filteredBrands.length === 1 ? 'brand' : 'brands'}
+                </span>
+                {userTier === 'free' && brands.length >= 70 && (
+                  <>
+                    <span style={{ color: '#D1D5DB' }}>·</span>
+                    <span 
+                      className="px-2 py-0.5 text-xs font-semibold"
+                      style={{
+                        background: 'rgba(251,146,60,0.08)',
+                        color: '#c05621',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(251,146,60,0.2)'
+                      }}
+                    >
+                      Free tier limit
+                    </span>
+                    <Link 
+                      href="/pricing"
+                      className="text-xs font-semibold transition-colors"
+                      style={{ color: '#FD8AE6' }}
+                    >
+                      Unlock all →
+                    </Link>
+                  </>
+                )}
+                {(searchTerm || selectedCategory !== 'all' || activityFilter !== 'all') && (
+                  <>
+                    <span style={{ color: '#D1D5DB' }}>·</span>
+                    <button
+                      onClick={() => { 
+                        setSearchTerm('')
+                        setSelectedCategory('all')
+                        setActivityFilter('all')
+                      }}
+                      className="text-sm font-medium transition-colors"
+                      style={{ color: '#FD8AE6', cursor: 'pointer', fontFamily: 'var(--font-libre), sans-serif' }}
+                    >
+                      Clear filters
+                    </button>
+                  </>
+                )}
+              </div>
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -383,18 +461,91 @@ export default function BrandsPage() {
           </div>
         </div>
 
+        {/* Upgrade CTA for Free Users */}
+        {userTier === 'free' && brands.length >= 70 && filteredBrands.length > 0 && (
+          <motion.div
+            className="mx-auto max-w-2xl mb-6 p-5 text-center"
+            style={{
+              background: 'linear-gradient(135deg, rgba(253,138,230,0.04) 0%, rgba(199,125,255,0.04) 100%)',
+              border: '1px solid rgba(253,138,230,0.12)',
+              borderRadius: '16px'
+            }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="mb-3">
+              <svg 
+                width="28" 
+                height="28" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: '#FD8AE6', margin: '0 auto' }}
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h3 
+              className="mb-1.5"
+              style={{ 
+                fontSize: '1.125rem', 
+                fontWeight: 600, 
+                color: '#0C0F1A',
+                fontFamily: 'var(--font-bricolage), sans-serif'
+              }}
+            >
+              You're viewing 70 of 200+ brands
+            </h3>
+            <p 
+              className="mb-4 text-sm"
+              style={{ 
+                color: '#5E6370',
+                fontFamily: 'var(--font-libre), sans-serif'
+              }}
+            >
+              Upgrade to unlock the full database with activity signals, hiring indicators, and verified contacts
+            </p>
+            <Link href="/pricing">
+              <button
+                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-all"
+                style={{
+                  background: '#0C0F1A',
+                  color: '#FFFFFF',
+                  borderRadius: '10px',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#0C0F1A'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                Upgrade to Pro
+              </button>
+            </Link>
+          </motion.div>
+        )}
+
         {/* Brands Grid */}
         {filteredBrands.length === 0 ? (
           <div className="bg-white p-16 text-center" style={{ borderRadius: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-bold mb-2" style={{ color: '#0C0F1A', fontFamily: 'var(--font-bricolage), sans-serif' }}>No brands found</h3>
             <p className="mb-4" style={{ color: '#5E6370' }}>Try adjusting your search or filters</p>
-            <Button variant="outline" onClick={() => { setSearchTerm(''); setSelectedCategory('all') }}>
+            <Button variant="outline" onClick={() => { setSearchTerm(''); setSelectedCategory('all'); setActivityFilter('all') }}>
               Clear filters
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {filteredBrands.map((brand, index) => {
               const categoryGradient = getCategoryGradient(brand.category)
               const avatarColor = getCategoryAvatarColor(brand.category)
@@ -405,8 +556,8 @@ export default function BrandsPage() {
                   key={brand.id}
                   className="bg-white overflow-hidden cursor-pointer group"
                   style={{
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                    borderRadius: '14px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                     border: '1px solid rgba(0,0,0,0.06)',
                     transition: 'all 0.15s ease-out'
                   }}
