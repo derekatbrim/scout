@@ -44,6 +44,7 @@ export default function BrandsPage() {
   const [sortBy, setSortBy] = useState<SortOption>('name')
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all')
   const [addingBrandId, setAddingBrandId] = useState<string | null>(null)
+  const [addedBrandIds, setAddedBrandIds] = useState<Set<string>>(new Set())
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
   const [userTier, setUserTier] = useState<'free' | 'pro' | 'premium' | 'trial'>('free')
   const router = useRouter()
@@ -172,6 +173,7 @@ export default function BrandsPage() {
       setAddingBrandId(null)
     } else {
       showToast(`✓ ${brand.name} added to your pipeline!`, 'success')
+      setAddedBrandIds(prev => new Set([...prev, brand.id]))
       setTimeout(() => setAddingBrandId(null), 1500)
     }
   }
@@ -349,6 +351,11 @@ export default function BrandsPage() {
                       e.currentTarget.style.boxShadow = 'none'
                     }
                   }}
+                  onTouchStart={(e) => {
+                    if (selectedCategory !== cat) {
+                      e.currentTarget.style.boxShadow = 'none'
+                    }
+                  }}
                 >
                   {cat === 'all' ? 'All Brands' : cat}
                 </button>
@@ -477,6 +484,7 @@ export default function BrandsPage() {
               const categoryGradient = getCategoryGradient(brand.category)
               const avatarColor = getCategoryAvatarColor(brand.category)
               const description = getBrandDescription(brand)
+              const isAdded = addedBrandIds.has(brand.id)
               
               return (
                 <motion.div
@@ -504,7 +512,7 @@ export default function BrandsPage() {
                   }}
                 >
                   {/* Header with Gradient */}
-                  <div className="px-6 pt-6 pb-4" style={{ background: categoryGradient }}>
+                  <div className="px-7 pt-6 pb-4" style={{ background: categoryGradient }}>
                     {/* Signals Row */}
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
                       {/* Activity Badge - NEW */}
@@ -570,7 +578,7 @@ export default function BrandsPage() {
                   <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}></div>
 
                   {/* Card Body */}
-                  <div className="px-6 py-4">
+                  <div className="px-7 py-4">
                     {brand.typical_rate_min && brand.typical_rate_max && (
                       <div className="mb-3">
                         <div className="text-xs font-medium mb-1" style={{ color: '#5E6370' }}>Typical rate</div>
@@ -597,33 +605,35 @@ export default function BrandsPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        addToPipeline(brand)
+                        if (!isAdded) {
+                          addToPipeline(brand)
+                        }
                       }}
-                      disabled={addingBrandId === brand.id}
+                      disabled={addingBrandId === brand.id || isAdded}
                       className="w-full px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition-all"
                       style={{
-                        background: addingBrandId === brand.id ? 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)' : '#0C0F1A',
+                        background: (addingBrandId === brand.id || isAdded) ? 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)' : '#0C0F1A',
                         borderRadius: '12px',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                        cursor: addingBrandId === brand.id ? 'not-allowed' : 'pointer',
+                        cursor: (addingBrandId === brand.id || isAdded) ? 'not-allowed' : 'pointer',
                         fontFamily: 'var(--font-libre), sans-serif'
                       }}
                       onMouseEnter={(e) => {
-                        if (addingBrandId !== brand.id) {
+                        if (addingBrandId !== brand.id && !isAdded) {
                           e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
                           e.currentTarget.style.transform = 'translateY(-1px)'
                           e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (addingBrandId !== brand.id) {
+                        if (addingBrandId !== brand.id && !isAdded) {
                           e.currentTarget.style.background = '#0C0F1A'
                           e.currentTarget.style.transform = 'translateY(0)'
                           e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'
                         }
                       }}
                     >
-                      {addingBrandId === brand.id ? '✓ Added to Pipeline!' : '+ Add to Pipeline'}
+                      {(addingBrandId === brand.id || isAdded) ? '✓ Added to Pipeline!' : '+ Add to Pipeline'}
                     </button>
                   </div>
                 </motion.div>
@@ -635,7 +645,7 @@ export default function BrandsPage() {
         {/* Upgrade CTA at Bottom (Free Users Only) */}
         {userTier === 'free' && brands.length >= 70 && filteredBrands.length > 0 && (
           <motion.div
-            className="mx-auto max-w-2xl mt-8 p-6 text-center"
+            className="mx-auto max-w-2xl mt-8 mb-12 p-6 text-center"
             style={{
               background: 'linear-gradient(135deg, rgba(253,138,230,0.04) 0%, rgba(199,125,255,0.04) 100%)',
               border: '1px solid rgba(253,138,230,0.12)',
