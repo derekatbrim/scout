@@ -668,7 +668,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Pro Content or Paywall */}
-          <div>
+          <div className="relative">
             {/* Content - Always render but blur for free users */}
             <div
               className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${!isPro ? 'blur-sm opacity-40 pointer-events-none select-none' : ''}`}
