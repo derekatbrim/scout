@@ -556,7 +556,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Advanced Insights */}
-        <div style={{ marginBottom: '2rem' }}>
+        <div className="relative" style={{ marginBottom: '2rem' }}>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3
@@ -668,7 +668,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Pro Content or Paywall */}
-          <div className="relative">
+          <div>
             {/* Content - Always render but blur for free users */}
             <div
               className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${!isPro ? 'blur-sm opacity-40 pointer-events-none select-none' : ''}`}
