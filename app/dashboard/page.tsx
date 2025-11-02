@@ -997,25 +997,20 @@ export default function DashboardPage() {
               {/* Placeholder for Free Users */}
               {!isPro && !advancedMetrics && (
                 <>
-                  <div style={{ background: '#FFFFFF', padding: '2rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
-                    <div style={{ height: '200px' }} />
-                  </div>
-                  <div style={{ background: '#FFFFFF', padding: '2rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
-                    <div style={{ height: '200px' }} />
-                  </div>
-                  <div className="md:col-span-2" style={{ background: '#FFFFFF', padding: '2rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
-                    <div style={{ height: '200px' }} />
-                  </div>
+                  {/* Empty grid items to maintain layout structure */}
+                  <div />
+                  <div />
+                  <div className="md:col-span-2" />
                 </>
               )}
             </div>
 
-            {/* Paywall Overlay - FIXED: Now shows for all free users */}
+            {/* Paywall Overlay - Shows for all free users */}
             {!isPro && (
               <div
                 className="absolute inset-0 flex items-center justify-center rounded-2xl"
                 style={{
-                  background: 'rgba(255,255,255,0.85)',
+                  background: 'rgba(248,249,251,0.92)',
                   backdropFilter: 'blur(12px)',
                   WebkitBackdropFilter: 'blur(12px)'
                 }}
