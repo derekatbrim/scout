@@ -323,13 +323,23 @@ export default function BrandsPage() {
               maskImage: 'linear-gradient(to right, black calc(100% - 80px), transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 80px), transparent 100%)'
             }}
+            onScroll={(e) => {
+              // Clear all hover states on scroll
+              const buttons = e.currentTarget.querySelectorAll('button')
+              buttons.forEach((btn) => {
+                if (!btn.classList.contains('selected')) {
+                  ;(btn as HTMLElement).style.boxShadow = 'none'
+                  ;(btn as HTMLElement).style.background = '#F8F9FB'
+                }
+              })
+            }}
           >
             <div className="flex items-center gap-3">
               {categories.map(cat => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className="px-5 py-2.5 text-sm font-medium whitespace-nowrap transition-all"
+                  className={`px-5 py-2.5 text-sm font-medium whitespace-nowrap ${selectedCategory === cat ? 'selected' : ''}`}
                   style={{
                     borderRadius: '9999px',
                     background: selectedCategory === cat ? '#0C0F1A' : '#F8F9FB',
@@ -337,7 +347,8 @@ export default function BrandsPage() {
                     boxShadow: selectedCategory === cat ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
                     border: selectedCategory === cat ? 'none' : '1px solid rgba(0,0,0,0.06)',
                     cursor: 'pointer',
-                    fontFamily: 'var(--font-libre), sans-serif'
+                    fontFamily: 'var(--font-libre), sans-serif',
+                    transition: 'background 0.15s ease, color 0.15s ease'
                   }}
                   onMouseEnter={(e) => {
                     if (selectedCategory !== cat) {
@@ -351,8 +362,9 @@ export default function BrandsPage() {
                       e.currentTarget.style.boxShadow = 'none'
                     }
                   }}
-                  onTouchStart={(e) => {
+                  onTouchEnd={(e) => {
                     if (selectedCategory !== cat) {
+                      e.currentTarget.style.background = '#F8F9FB'
                       e.currentTarget.style.boxShadow = 'none'
                     }
                   }}
@@ -512,7 +524,7 @@ export default function BrandsPage() {
                   }}
                 >
                   {/* Header with Gradient */}
-                  <div className="px-7 pt-6 pb-4" style={{ background: categoryGradient }}>
+                  <div className="px-8 pt-6 pb-4" style={{ background: categoryGradient }}>
                     {/* Signals Row */}
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
                       {/* Activity Badge - NEW */}
@@ -578,7 +590,7 @@ export default function BrandsPage() {
                   <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}></div>
 
                   {/* Card Body */}
-                  <div className="px-7 py-4">
+                  <div className="px-8 py-4">
                     {brand.typical_rate_min && brand.typical_rate_max && (
                       <div className="mb-3">
                         <div className="text-xs font-medium mb-1" style={{ color: '#5E6370' }}>Typical rate</div>
