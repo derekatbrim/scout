@@ -704,6 +704,7 @@ export default function BrandsPage() {
             })}
           </div>
         )}
+        </div>
       </div>
 
       {/* Brand Drawer */}
