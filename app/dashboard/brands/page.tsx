@@ -304,11 +304,13 @@ export default function BrandsPage() {
                   className="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-all"
                   style={{
                     background: '#0C0F1A',
-                    fontFamily: 'var(--font-libre), sans-serif'
+                    fontFamily: 'var(--font-libre), sans-serif',
+                    cursor: 'pointer'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
                     e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.cursor = 'pointer'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = '#0C0F1A'
@@ -747,12 +749,14 @@ export default function BrandsPage() {
                       background: '#0C0F1A',
                       color: '#FFFFFF',
                       fontFamily: 'var(--font-libre), sans-serif',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      cursor: 'pointer'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
                       e.currentTarget.style.transform = 'translateY(-2px)'
                       e.currentTarget.style.boxShadow = '0 6px 16px rgba(253,138,230,0.3)'
+                      e.currentTarget.style.cursor = 'pointer'
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = '#0C0F1A'
