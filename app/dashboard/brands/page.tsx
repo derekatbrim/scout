@@ -268,14 +268,58 @@ export default function BrandsPage() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="mb-10">
-          <h2 className="text-4xl font-bold mb-3" style={{ color: '#0C0F1A', fontFamily: 'var(--font-bricolage), sans-serif' }}>
-            Brand Database
-          </h2>
-          <p className="text-lg" style={{ color: '#5E6370' }}>
-            Discover and connect with {brands.length} brands in your niche
-          </p>
+        {/* Header with CTA Card */}
+        <div className="flex items-start justify-between gap-8 mb-10 flex-wrap">
+          {/* Left: Title Section */}
+          <div className="flex flex-col">
+            <h2 className="text-4xl font-bold mb-3" style={{ color: '#0C0F1A', fontFamily: 'var(--font-bricolage), sans-serif' }}>
+              Brand Database
+            </h2>
+            <p className="text-lg" style={{ color: '#5E6370' }}>
+              Discover and connect with {brands.length} brands in your niche
+            </p>
+          </div>
+
+          {/* Right: CTA Card */}
+          {userTier === 'free' && (
+            <div 
+              className="flex-shrink-0 px-6 py-4 rounded-2xl"
+              style={{
+                background: 'linear-gradient(135deg, rgba(253,138,230,0.08) 0%, rgba(199,125,255,0.08) 100%)',
+                border: '1px solid rgba(253,138,230,0.2)',
+                maxWidth: '340px'
+              }}
+            >
+              <div className="mb-1" style={{ color: '#FD8AE6', fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                FREE TRIAL
+              </div>
+              <h3 className="text-base font-semibold mb-2" style={{ color: '#0C0F1A', fontFamily: 'var(--font-bricolage), sans-serif', lineHeight: '1.4' }}>
+                Get immediate access to 130+ brands by upgrading to Pro
+              </h3>
+              <p className="text-sm mb-3" style={{ color: '#5E6370', lineHeight: '1.5' }}>
+                Start discovering verified brand contacts today.
+              </p>
+              <Link href="/pricing">
+                <button
+                  className="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-all"
+                  style={{
+                    background: '#0C0F1A',
+                    fontFamily: 'var(--font-libre), sans-serif'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#0C0F1A'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  Try Pro for $0
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Search Container */}
@@ -481,7 +525,7 @@ export default function BrandsPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6 px-4">
             {filteredBrands.map((brand, index) => {
               const categoryGradient = getCategoryGradient(brand.category)
               const avatarColor = getCategoryAvatarColor(brand.category)
@@ -644,76 +688,83 @@ export default function BrandsPage() {
           </div>
         )}
         
-        {/* Upgrade CTA at Bottom (Free Users Only) */}
+        {/* Upgrade CTA at Bottom (Free Users Only) - Contra Style */}
         {userTier === 'free' && brands.length >= 70 && filteredBrands.length > 0 && (
           <motion.div
-            className="mx-auto max-w-2xl mt-8 mb-12 p-6 text-center"
-            style={{
-              background: 'linear-gradient(135deg, rgba(253,138,230,0.04) 0%, rgba(199,125,255,0.04) 100%)',
-              border: '1px solid rgba(253,138,230,0.12)',
-              borderRadius: '16px'
-            }}
+            className="mx-auto mt-12 mb-12 px-4"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            <div className="mb-3">
-              <svg 
-                width="28" 
-                height="28" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: '#FD8AE6', margin: '0 auto' }}
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </div>
-            <h3 
-              className="mb-1.5"
-              style={{ 
-                fontSize: '1.125rem', 
-                fontWeight: 600, 
-                color: '#0C0F1A',
-                fontFamily: 'var(--font-bricolage), sans-serif'
+            <div
+              className="relative overflow-hidden px-8 py-10 text-center rounded-3xl"
+              style={{
+                background: 'linear-gradient(180deg, rgba(253,138,230,0.06) 0%, rgba(199,125,255,0.06) 50%, rgba(138,180,248,0.06) 100%)',
+                border: '1px solid rgba(253,138,230,0.15)'
               }}
             >
-              You've reached the end of your free tier
-            </h3>
-            <p 
-              className="mb-4 text-sm"
-              style={{ 
-                color: '#5E6370',
-                fontFamily: 'var(--font-libre), sans-serif'
-              }}
-            >
-              Unlock 130+ more brands with activity signals, hiring indicators, and verified contacts
-            </p>
-            <Link href="/pricing">
-              <button
-                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-all"
+              {/* Background gradient effect */}
+              <div 
+                className="absolute inset-0 opacity-30"
                 style={{
-                  background: '#0C0F1A',
-                  color: '#FFFFFF',
-                  borderRadius: '10px',
-                  cursor: 'pointer'
+                  background: 'radial-gradient(circle at 50% 0%, rgba(253,138,230,0.2) 0%, transparent 60%)',
+                  pointerEvents: 'none'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#0C0F1A'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                Upgrade to Pro
-              </button>
-            </Link>
+              />
+              
+              <div className="relative z-10">
+                <div className="mb-3" style={{ color: '#FD8AE6', fontSize: '12px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                  FREE TRIAL
+                </div>
+                <h3 
+                  className="mb-2 text-2xl md:text-3xl"
+                  style={{ 
+                    fontWeight: 600, 
+                    color: '#0C0F1A',
+                    fontFamily: 'var(--font-bricolage), sans-serif',
+                    lineHeight: '1.3'
+                  }}
+                >
+                  Get immediate access to all 130+ brand contacts by upgrading to Pro
+                </h3>
+                <p 
+                  className="mb-6 text-base max-w-xl mx-auto"
+                  style={{ 
+                    color: '#5E6370',
+                    fontFamily: 'var(--font-libre), sans-serif',
+                    lineHeight: '1.6'
+                  }}
+                >
+                  Start pitching the best brands on Scout.
+                </p>
+                <Link href="/pricing">
+                  <button
+                    className="px-8 py-3.5 text-base font-semibold rounded-xl transition-all inline-flex items-center gap-2"
+                    style={{
+                      background: '#0C0F1A',
+                      color: '#FFFFFF',
+                      fontFamily: 'var(--font-libre), sans-serif',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(253,138,230,0.3)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#0C0F1A'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold" style={{ background: 'rgba(253,138,230,0.2)' }}>
+                      ✦
+                    </span>
+                    Try Pro for $0
+                  </button>
+                </Link>
+              </div>
+            </div>
           </motion.div>
         )}
         
