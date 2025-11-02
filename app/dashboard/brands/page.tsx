@@ -319,9 +319,7 @@ export default function BrandsPage() {
           <div 
             className="px-8 py-6 scrollbar-hide overflow-x-auto relative" 
             style={{ 
-              borderBottom: '1px solid rgba(0,0,0,0.06)',
-              maskImage: 'linear-gradient(to right, black calc(100% - 80px), transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 80px), transparent 100%)'
+              borderBottom: '1px solid rgba(0,0,0,0.06)'
             }}
             onScroll={(e) => {
               // Clear all hover states on scroll
@@ -491,7 +489,7 @@ export default function BrandsPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredBrands.map((brand, index) => {
               const categoryGradient = getCategoryGradient(brand.category)
               const avatarColor = getCategoryAvatarColor(brand.category)
