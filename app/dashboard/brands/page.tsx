@@ -269,9 +269,9 @@ export default function BrandsPage() {
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 lg:px-8 py-12">
         {/* Header with CTA Card */}
-        <div className="flex items-start justify-between gap-8 mb-10 flex-wrap">
+        <div className="flex items-end justify-between gap-8 mb-10 flex-wrap">
           {/* Left: Title Section */}
-          <div className="flex flex-col">
+          <div className="flex flex-col flex-shrink-0">
             <h2 className="text-4xl font-bold mb-3" style={{ color: '#0C0F1A', fontFamily: 'var(--font-bricolage), sans-serif' }}>
               Brand Database
             </h2>
@@ -283,11 +283,11 @@ export default function BrandsPage() {
           {/* Right: CTA Card */}
           {userTier === 'free' && (
             <div 
-              className="flex-shrink-0 px-6 py-4 rounded-2xl"
+              className="flex-1 px-6 py-4 rounded-2xl"
               style={{
                 background: 'linear-gradient(135deg, rgba(253,138,230,0.08) 0%, rgba(199,125,255,0.08) 100%)',
                 border: '1px solid rgba(253,138,230,0.2)',
-                maxWidth: '340px'
+                minWidth: '340px'
               }}
             >
               <div className="mb-1" style={{ color: '#FD8AE6', fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
@@ -423,6 +423,9 @@ export default function BrandsPage() {
               <div className="flex items-center gap-3">
                 <span className="text-sm" style={{ color: '#5E6370', fontFamily: 'var(--font-libre), sans-serif' }}>
                   <span className="font-semibold" style={{ color: '#0C0F1A' }}>{filteredBrands.length}</span> {filteredBrands.length === 1 ? 'brand' : 'brands'}
+                  {userTier === 'free' && brands.length >= 70 && (
+                    <span style={{ color: '#9CA3AF' }}> (showing 70 of 200+)</span>
+                  )}
                 </span>
                 {userTier === 'free' && brands.length >= 70 && (
                   <>
