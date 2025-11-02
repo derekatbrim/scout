@@ -8,6 +8,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { showToast } from '@/components/ui/toast'
 import { BrandDrawer } from '@/components/brand-drawer'
+import { ActivityBadge } from '@/components/activity-badge'
+import { HiringBadge } from '@/components/hiring-badge'
 
 interface Brand {
   id: string
@@ -21,9 +23,17 @@ interface Brand {
   response_rate: string
   best_outreach_method: string
   notes: string
+  // Activity signals
+  activity_status?: 'active' | 'moderate' | 'quiet' | 'unknown'
+  activity_score?: number
+  hiring_status?: 'hiring' | 'open' | 'closed' | 'unknown'
+  last_campaign_date?: string
+  last_instagram_collab_date?: string
+  has_creator_program?: boolean
 }
 
 type SortOption = 'name' | 'rate-low' | 'rate-high' | 'response-rate'
+type ActivityFilter = 'all' | 'active' | 'moderate' | 'hiring' | 'recent'
 
 export default function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([])
@@ -32,6 +42,7 @@ export default function BrandsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState<SortOption>('name')
+  const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all')
   const [addingBrandId, setAddingBrandId] = useState<string | null>(null)
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
   const router = useRouter()
@@ -78,6 +89,27 @@ export default function BrandsPage() {
       filtered = filtered.filter(brand => brand.category === selectedCategory)
     }
 
+    // Activity filtering - NEW
+    if (activityFilter !== 'all') {
+      if (activityFilter === 'active') {
+        filtered = filtered.filter(brand => brand.activity_status === 'active')
+      } else if (activityFilter === 'moderate') {
+        filtered = filtered.filter(brand => brand.activity_status === 'moderate')
+      } else if (activityFilter === 'hiring') {
+        filtered = filtered.filter(brand => brand.hiring_status === 'hiring')
+      } else if (activityFilter === 'recent') {
+        filtered = filtered.filter(brand => {
+          if (!brand.last_campaign_date && !brand.last_instagram_collab_date) return false
+          const mostRecentDate = brand.last_campaign_date || brand.last_instagram_collab_date
+          if (!mostRecentDate) return false
+          const daysSince = Math.floor(
+            (new Date().getTime() - new Date(mostRecentDate).getTime()) / (1000 * 60 * 60 * 24)
+          )
+          return daysSince <= 30
+        })
+      }
+    }
+
     filtered = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'name':
@@ -96,7 +128,7 @@ export default function BrandsPage() {
     })
 
     setFilteredBrands(filtered)
-  }, [searchTerm, selectedCategory, sortBy, brands])
+  }, [searchTerm, selectedCategory, sortBy, activityFilter, brands])
 
   const addToPipeline = async (brand: Brand) => {
     setAddingBrandId(brand.id)
@@ -302,10 +334,34 @@ export default function BrandsPage() {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm" style={{ color: '#5E6370' }}>Sort:</span>
-              <select
-                value={sortBy}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm" style={{ color: '#5E6370' }}>Activity:</span>
+                <select
+                  value={activityFilter}
+                  onChange={(e) => setActivityFilter(e.target.value as ActivityFilter)}
+                  className="px-3 py-1.5 text-sm font-medium transition-all focus:outline-none"
+                  style={{
+                    background: '#FFFFFF',
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    borderRadius: '8px',
+                    color: '#0C0F1A',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-libre), sans-serif'
+                  }}
+                >
+                  <option value="all">All brands</option>
+                  <option value="active">Active campaigns</option>
+                  <option value="moderate">Moderate activity</option>
+                  <option value="hiring">Hiring now</option>
+                  <option value="recent">Recent (30d)</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-sm" style={{ color: '#5E6370' }}>Sort:</span>
+                <select
+                  value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
                 className="px-3 py-1.5 text-sm font-medium transition-all focus:outline-none"
                 style={{
@@ -323,6 +379,7 @@ export default function BrandsPage() {
                 <option value="response-rate">Response Rate</option>
               </select>
             </div>
+          </div>
           </div>
         </div>
 
@@ -370,15 +427,42 @@ export default function BrandsPage() {
                 >
                   {/* Header with Gradient */}
                   <div className="px-6 pt-6 pb-4" style={{ background: categoryGradient }}>
-                    {/* Signals */}
-                    <div className="flex items-center gap-2 mb-3">
+                    {/* Signals Row */}
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
+                      {/* Activity Badge - NEW */}
+                      {brand.activity_status && brand.activity_status !== 'unknown' && (
+                        <ActivityBadge 
+                          status={brand.activity_status}
+                          compact
+                        />
+                      )}
+                      
+                      {/* Hiring Badge - NEW */}
+                      {brand.hiring_status && brand.hiring_status !== 'unknown' && brand.hiring_status !== 'closed' && (
+                        <HiringBadge status={brand.hiring_status} />
+                      )}
+                      
+                      {/* High Response Badge - EXISTING */}
                       {brand.response_rate === 'High' && (
-                        <span className="px-2.5 py-1 text-xs font-bold bg-green-50 text-green-700" style={{ borderRadius: '8px', border: '1px solid rgba(34,197,94,0.1)' }}>
+                        <span 
+                          className="px-2.5 py-1 text-xs font-bold"
+                          style={{
+                            background: 'rgba(34,197,94,0.08)',
+                            color: '#166534',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(34,197,94,0.1)'
+                          }}
+                        >
                           High Response
                         </span>
                       )}
+                      
+                      {/* Rate Badge - EXISTING */}
                       {brand.typical_rate_min && brand.typical_rate_max && (brand.typical_rate_max / brand.typical_rate_min > 4) && (
-                        <span className="px-2.5 py-1 text-xs font-bold text-white" style={{ background: '#0C0F1A', borderRadius: '8px' }}>
+                        <span 
+                          className="px-2.5 py-1 text-xs font-bold text-white" 
+                          style={{ background: '#0C0F1A', borderRadius: '8px' }}
+                        >
                           Starting at ${brand.typical_rate_min.toLocaleString()}
                         </span>
                       )}
