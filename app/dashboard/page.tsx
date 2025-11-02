@@ -668,7 +668,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Pro Content or Paywall */}
-          <div className="relative">
+          <div>
             {/* Content - Always render but blur for free users */}
             <div
               className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${!isPro ? 'blur-sm opacity-40 pointer-events-none select-none' : ''}`}
@@ -1005,99 +1005,99 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Paywall Overlay - Shows for all free users */}
-            {!isPro && (
-              <div
-                className="absolute inset-0 flex items-center justify-center rounded-2xl"
-                style={{
-                  background: 'rgba(248,249,251,0.92)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)'
-                }}
-              >
-                <motion.div
-                  className="max-w-md mx-auto text-center p-8 rounded-2xl"
-                  style={{
-                    background: '#FFFFFF',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
-                    border: '1px solid rgba(0,0,0,0.06)'
-                  }}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.25, delay: 0.1 }}
-                >
-                  <div
-                    className="mx-auto mb-5 flex items-center justify-center"
-                    style={{
-                      width: '64px',
-                      height: '64px',
-                      borderRadius: '20px',
-                      background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
-                      boxShadow: '0 8px 20px rgba(253,138,230,0.3)'
-                    }}
-                  >
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
 
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0C0F1A', marginBottom: '0.75rem', fontFamily: 'var(--font-bricolage), sans-serif' }}>
-                    Unlock Advanced Analytics
-                  </h3>
-                  <p style={{ fontSize: '1rem', color: '#5E6370', marginBottom: '1.5rem', fontFamily: 'var(--font-libre), sans-serif' }}>
-                    Get revenue projections, optimal timing insights, and AI-powered recommendations to close more deals
-                  </p>
-
-                  <ul className="text-left space-y-3 mb-6">
-                    {[
-                      'Revenue projections & forecasting',
-                      'Deal cycle analysis & benchmarking',
-                      'Optimal pitch timing recommendations',
-                      'AI-powered win rate insights',
-                      'Export reports as CSV or PDF'
-                    ].map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-3">
-                        <svg className="w-5 h-5 flex-shrink-0" style={{ color: '#22C55E' }} fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span style={{ fontSize: '0.9375rem', color: '#0C0F1A', fontFamily: 'var(--font-libre), sans-serif' }}>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link href="/pricing">
-                    <button
-                      className="w-full px-6 py-3 text-base font-semibold rounded-xl transition-all"
-                      style={{
-                        background: '#0C0F1A',
-                        color: '#FFFFFF',
-                        borderRadius: '12px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease-out'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
-                        e.currentTarget.style.transform = 'translateY(-1px)'
-                        e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#0C0F1A'
-                        e.currentTarget.style.transform = 'translateY(0)'
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'
-                      }}
-                    >
-                      Upgrade to Pro
-                    </button>
-                  </Link>
-                  <p style={{ fontSize: '0.8125rem', color: '#9CA3AF', marginTop: '1rem', fontFamily: 'var(--font-libre), sans-serif' }}>
-                    Start your 14-day free trial · No credit card required
-                  </p>
-                </motion.div>
-              </div>
-            )}
           </div>
         </div>
+
+        {/* Upgrade CTA - For free users only */}
+        {!isPro && (
+          <motion.div
+            style={{
+              background: '#F8F9FB',
+              marginBottom: '2rem'
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+          >
+            <div
+              className="max-w-md mx-auto text-center p-8 rounded-2xl"
+              style={{
+                background: '#FFFFFF',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                border: '1px solid rgba(0,0,0,0.06)'
+              }}
+            >
+              <div
+                className="mx-auto mb-5 flex items-center justify-center"
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '20px',
+                  background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
+                  boxShadow: '0 8px 20px rgba(253,138,230,0.3)'
+                }}
+              >
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0C0F1A', marginBottom: '0.75rem', fontFamily: 'var(--font-bricolage), sans-serif' }}>
+                Unlock Advanced Analytics
+              </h3>
+              <p style={{ fontSize: '1rem', color: '#5E6370', marginBottom: '1.5rem', fontFamily: 'var(--font-libre), sans-serif' }}>
+                Get revenue projections, optimal timing insights, and AI-powered recommendations to close more deals
+              </p>
+
+              <ul className="text-left space-y-3 mb-6">
+                {[
+                  'Revenue projections & forecasting',
+                  'Deal cycle analysis & benchmarking',
+                  'Optimal pitch timing recommendations',
+                  'AI-powered win rate insights',
+                  'Export reports as CSV or PDF'
+                ].map((feature, idx) => (
+                  <li key={idx} className="flex items-center gap-3">
+                    <svg className="w-5 h-5 flex-shrink-0" style={{ color: '#22C55E' }} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span style={{ fontSize: '0.9375rem', color: '#0C0F1A', fontFamily: 'var(--font-libre), sans-serif' }}>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link href="/pricing">
+                <button
+                  className="w-full px-6 py-3 text-base font-semibold rounded-xl transition-all"
+                  style={{
+                    background: '#0C0F1A',
+                    color: '#FFFFFF',
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease-out'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#0C0F1A'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'
+                  }}
+                >
+                  Upgrade to Pro
+                </button>
+              </Link>
+              <p style={{ fontSize: '0.8125rem', color: '#9CA3AF', marginTop: '1rem', fontFamily: 'var(--font-libre), sans-serif' }}>
+                Start your 14-day free trial · No credit card required
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: '1.75rem', marginBottom: '2rem' }}>
