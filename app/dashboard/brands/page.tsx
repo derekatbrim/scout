@@ -371,14 +371,6 @@ export default function BrandsPage() {
                 </button>
               ))}
             </div>
-            
-            {/* Fade gradient indicator on right */}
-            <div 
-              className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none"
-              style={{
-                background: 'linear-gradient(to left, #FFFFFF 0%, transparent 100%)'
-              }}
-            />
           </div>
 
           {/* Results Row with Tier Badge */}
@@ -489,7 +481,7 @@ export default function BrandsPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
             {filteredBrands.map((brand, index) => {
               const categoryGradient = getCategoryGradient(brand.category)
               const avatarColor = getCategoryAvatarColor(brand.category)
