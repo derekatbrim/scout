@@ -332,7 +332,7 @@ export default function BrandsPage() {
                     borderRadius: '9999px',
                     background: selectedCategory === cat ? '#0C0F1A' : '#F8F9FB',
                     color: selectedCategory === cat ? '#FFFFFF' : '#0C0F1A',
-                    boxShadow: selectedCategory === cat ? '0 2px 8px rgba(0,0,0,0.08)' : '0 1px 2px rgba(0,0,0,0.04)',
+                    boxShadow: selectedCategory === cat ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
                     border: selectedCategory === cat ? 'none' : '1px solid rgba(0,0,0,0.06)',
                     cursor: 'pointer',
                     fontFamily: 'var(--font-libre), sans-serif'
@@ -346,7 +346,7 @@ export default function BrandsPage() {
                   onMouseLeave={(e) => {
                     if (selectedCategory !== cat) {
                       e.currentTarget.style.background = '#F8F9FB'
-                      e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)'
+                      e.currentTarget.style.boxShadow = 'none'
                     }
                   }}
                 >
@@ -359,7 +359,7 @@ export default function BrandsPage() {
             <div 
               className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none"
               style={{
-                background: 'linear-gradient(to left, rgba(248,249,251,1) 0%, transparent 100%)'
+                background: 'linear-gradient(to left, #FFFFFF 0%, transparent 100%)'
               }}
             />
           </div>
@@ -460,79 +460,6 @@ export default function BrandsPage() {
           </div>
           </div>
         </div>
-
-        {/* Upgrade CTA for Free Users */}
-        {userTier === 'free' && brands.length >= 70 && filteredBrands.length > 0 && (
-          <motion.div
-            className="mx-auto max-w-2xl mb-6 p-5 text-center"
-            style={{
-              background: 'linear-gradient(135deg, rgba(253,138,230,0.04) 0%, rgba(199,125,255,0.04) 100%)',
-              border: '1px solid rgba(253,138,230,0.12)',
-              borderRadius: '16px'
-            }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="mb-3">
-              <svg 
-                width="28" 
-                height="28" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: '#FD8AE6', margin: '0 auto' }}
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </div>
-            <h3 
-              className="mb-1.5"
-              style={{ 
-                fontSize: '1.125rem', 
-                fontWeight: 600, 
-                color: '#0C0F1A',
-                fontFamily: 'var(--font-bricolage), sans-serif'
-              }}
-            >
-              You're viewing 70 of 200+ brands
-            </h3>
-            <p 
-              className="mb-4 text-sm"
-              style={{ 
-                color: '#5E6370',
-                fontFamily: 'var(--font-libre), sans-serif'
-              }}
-            >
-              Upgrade to unlock the full database with activity signals, hiring indicators, and verified contacts
-            </p>
-            <Link href="/pricing">
-              <button
-                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-all"
-                style={{
-                  background: '#0C0F1A',
-                  color: '#FFFFFF',
-                  borderRadius: '10px',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#0C0F1A'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                Upgrade to Pro
-              </button>
-            </Link>
-          </motion.div>
-        )}
 
         {/* Brands Grid */}
         {filteredBrands.length === 0 ? (
@@ -675,7 +602,7 @@ export default function BrandsPage() {
                       disabled={addingBrandId === brand.id}
                       className="w-full px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition-all"
                       style={{
-                        background: '#0C0F1A',
+                        background: addingBrandId === brand.id ? 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)' : '#0C0F1A',
                         borderRadius: '12px',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                         cursor: addingBrandId === brand.id ? 'not-allowed' : 'pointer',
@@ -704,6 +631,80 @@ export default function BrandsPage() {
             })}
           </div>
         )}
+        
+        {/* Upgrade CTA at Bottom (Free Users Only) */}
+        {userTier === 'free' && brands.length >= 70 && filteredBrands.length > 0 && (
+          <motion.div
+            className="mx-auto max-w-2xl mt-8 p-6 text-center"
+            style={{
+              background: 'linear-gradient(135deg, rgba(253,138,230,0.04) 0%, rgba(199,125,255,0.04) 100%)',
+              border: '1px solid rgba(253,138,230,0.12)',
+              borderRadius: '16px'
+            }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
+            <div className="mb-3">
+              <svg 
+                width="28" 
+                height="28" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: '#FD8AE6', margin: '0 auto' }}
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h3 
+              className="mb-1.5"
+              style={{ 
+                fontSize: '1.125rem', 
+                fontWeight: 600, 
+                color: '#0C0F1A',
+                fontFamily: 'var(--font-bricolage), sans-serif'
+              }}
+            >
+              You've reached the end of your free tier
+            </h3>
+            <p 
+              className="mb-4 text-sm"
+              style={{ 
+                color: '#5E6370',
+                fontFamily: 'var(--font-libre), sans-serif'
+              }}
+            >
+              Unlock 130+ more brands with activity signals, hiring indicators, and verified contacts
+            </p>
+            <Link href="/pricing">
+              <button
+                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-all"
+                style={{
+                  background: '#0C0F1A',
+                  color: '#FFFFFF',
+                  borderRadius: '10px',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#0C0F1A'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                Upgrade to Pro
+              </button>
+            </Link>
+          </motion.div>
+        )}
+        
         </div>
       </div>
 
