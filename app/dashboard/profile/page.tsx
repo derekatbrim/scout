@@ -47,17 +47,17 @@ type TabType = 'work' | 'about' | 'pro-features'
 const ProBadge = ({ tier }: { tier: 'pro' | 'premium' | 'trial' }) => {
   const badgeConfig = {
     pro: {
-      label: 'Pro',
+      label: 'PRO',
       gradient: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
       textColor: '#FFFFFF'
     },
     premium: {
-      label: 'Premium',
+      label: 'PREMIUM',
       gradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
       textColor: '#FFFFFF'
     },
     trial: {
-      label: 'Trial',
+      label: 'TRIAL',
       gradient: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
       textColor: '#FFFFFF'
     }
@@ -67,12 +67,14 @@ const ProBadge = ({ tier }: { tier: 'pro' | 'premium' | 'trial' }) => {
 
   return (
     <span
-      className="px-2.5 py-1 text-xs font-bold inline-flex items-center gap-1"
+      className="px-2.5 py-1 text-xs font-bold inline-flex items-center gap-1.5"
       style={{
         background: config.gradient,
         color: config.textColor,
         borderRadius: '6px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+        letterSpacing: '0.5px',
+        fontFamily: 'var(--font-libre), sans-serif'
       }}
     >
       <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -1039,10 +1041,11 @@ export default function ProfilePage() {
                   <div className="space-y-6">
                     {/* Pro Status Banner */}
                     <div 
-                      className="p-6 rounded-2xl"
+                      className="p-6"
                       style={{
                         background: 'linear-gradient(135deg, rgba(253,138,230,0.08) 0%, rgba(199,125,255,0.08) 100%)',
-                        border: '1px solid rgba(253,138,230,0.2)'
+                        border: '1px solid rgba(253,138,230,0.2)',
+                        borderRadius: '16px'
                       }}
                     >
                       <div className="flex items-start justify-between">
@@ -1061,145 +1064,409 @@ export default function ProfilePage() {
                             {profile && <ProBadge tier={profile.subscription_tier as 'pro' | 'premium' | 'trial'} />}
                           </div>
                           <p style={{ fontSize: '14px', color: '#5E6370' }}>
-                            Unlock unlimited brand access and advanced features
+                            Access all premium features to accelerate your brand partnerships
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Pro Features Grid */}
+                    {/* Pro Features Grid - Clickable Cards */}
                     <div className="grid md:grid-cols-2 gap-4">
-                      {[
-                        {
-                          icon: (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          ),
-                          title: 'Unlimited Brand Access',
-                          description: 'View all 200+ brand contacts without limits',
-                          active: true
-                        },
-                        {
-                          icon: (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          ),
-                          title: 'CSV Export',
-                          description: 'Export brand contacts to CSV for outreach',
-                          active: true
-                        },
-                        {
-                          icon: (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                          ),
-                          title: 'Priority Support',
-                          description: 'Get faster responses from our team',
-                          active: true
-                        },
-                        {
-                          icon: (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                          ),
-                          title: 'Advanced Analytics',
-                          description: 'Track your pitch success rates and earnings',
-                          active: false,
-                          comingSoon: true
-                        },
-                        {
-                          icon: (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                          ),
-                          title: 'Featured in Search',
-                          description: 'Stand out when brands browse creators',
-                          active: false,
-                          comingSoon: true
-                        },
-                        {
-                          icon: (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                            </svg>
-                          ),
-                          title: 'Custom Profile URL',
-                          description: 'Get a branded profile link (scout.pro/yourname)',
-                          active: false,
-                          comingSoon: true
-                        },
-                      ].map((feature, idx) => (
+                      {/* Unlimited Brand Access */}
+                      <Link href="/dashboard/brands">
                         <div
-                          key={idx}
-                          className="p-5 transition-all"
+                          className="p-5 cursor-pointer transition-all group"
                           style={{
-                            background: feature.active ? '#F8F9FB' : 'rgba(248,249,251,0.5)',
-                            border: feature.active ? '1px solid rgba(0,0,0,0.06)' : '1px solid rgba(0,0,0,0.04)',
-                            borderRadius: '12px',
-                            opacity: feature.active ? 1 : 0.6
+                            background: '#FFFFFF',
+                            border: '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.01)'
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
+                            e.currentTarget.style.borderColor = 'rgba(253,138,230,0.25)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
+                            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'
                           }}
                         >
                           <div className="flex items-start gap-3">
                             <div 
-                              className="flex-shrink-0 p-2 rounded-lg"
+                              className="flex-shrink-0 p-2.5 transition-all"
                               style={{
-                                background: feature.active ? 'linear-gradient(135deg, rgba(253,138,230,0.15) 0%, rgba(199,125,255,0.15) 100%)' : 'rgba(0,0,0,0.03)',
-                                color: feature.active ? '#FD8AE6' : '#9CA3AF'
+                                background: 'linear-gradient(135deg, rgba(253,138,230,0.15) 0%, rgba(199,125,255,0.15) 100%)',
+                                borderRadius: '10px',
+                                color: '#FD8AE6'
                               }}
                             >
-                              {feature.icon}
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
                             </div>
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 
-                                  className="font-semibold"
-                                  style={{ 
-                                    fontSize: '14px',
-                                    color: feature.active ? '#0C0F1A' : '#5E6370'
-                                  }}
-                                >
-                                  {feature.title}
-                                </h4>
-                                {feature.comingSoon && (
-                                  <span 
-                                    className="px-2 py-0.5 text-xs font-semibold"
-                                    style={{
-                                      background: 'rgba(59,130,246,0.1)',
-                                      color: '#3B82F6',
-                                      borderRadius: '6px'
-                                    }}
-                                  >
-                                    Soon
-                                  </span>
-                                )}
-                              </div>
+                              <h4 
+                                className="font-semibold mb-1"
+                                style={{ 
+                                  fontSize: '15px',
+                                  color: '#0C0F1A',
+                                  fontFamily: 'var(--font-bricolage), sans-serif'
+                                }}
+                              >
+                                Unlimited Brand Access
+                              </h4>
                               <p style={{ fontSize: '13px', color: '#5E6370', lineHeight: '1.5' }}>
-                                {feature.description}
+                                View all 200+ brand contacts without limits
                               </p>
                             </div>
+                            <svg 
+                              className="w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              style={{ color: '#FD8AE6' }}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                           </div>
                         </div>
-                      ))}
+                      </Link>
+
+                      {/* CSV Export */}
+                      <Link href="/dashboard/brands">
+                        <div
+                          className="p-5 cursor-pointer transition-all group"
+                          style={{
+                            background: '#FFFFFF',
+                            border: '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.01)'
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
+                            e.currentTarget.style.borderColor = 'rgba(253,138,230,0.25)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
+                            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="flex-shrink-0 p-2.5 transition-all"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(253,138,230,0.15) 0%, rgba(199,125,255,0.15) 100%)',
+                                borderRadius: '10px',
+                                color: '#FD8AE6'
+                              }}
+                            >
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 
+                                className="font-semibold mb-1"
+                                style={{ 
+                                  fontSize: '15px',
+                                  color: '#0C0F1A',
+                                  fontFamily: 'var(--font-bricolage), sans-serif'
+                                }}
+                              >
+                                CSV Export
+                              </h4>
+                              <p style={{ fontSize: '13px', color: '#5E6370', lineHeight: '1.5' }}>
+                                Export brand contacts to CSV for outreach campaigns
+                              </p>
+                            </div>
+                            <svg 
+                              className="w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              style={{ color: '#FD8AE6' }}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </Link>
+
+                      {/* Advanced Analytics */}
+                      <Link href="/dashboard/analytics">
+                        <div
+                          className="p-5 cursor-pointer transition-all group"
+                          style={{
+                            background: '#FFFFFF',
+                            border: '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.01)'
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
+                            e.currentTarget.style.borderColor = 'rgba(253,138,230,0.25)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
+                            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="flex-shrink-0 p-2.5 transition-all"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(253,138,230,0.15) 0%, rgba(199,125,255,0.15) 100%)',
+                                borderRadius: '10px',
+                                color: '#FD8AE6'
+                              }}
+                            >
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 
+                                className="font-semibold mb-1"
+                                style={{ 
+                                  fontSize: '15px',
+                                  color: '#0C0F1A',
+                                  fontFamily: 'var(--font-bricolage), sans-serif'
+                                }}
+                              >
+                                Advanced Analytics
+                              </h4>
+                              <p style={{ fontSize: '13px', color: '#5E6370', lineHeight: '1.5' }}>
+                                Track pitch success rates, earnings, and performance
+                              </p>
+                            </div>
+                            <svg 
+                              className="w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              style={{ color: '#FD8AE6' }}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </Link>
+
+                      {/* Priority Support */}
+                      <a 
+                        href="mailto:support@scout.com?subject=Pro Support Request"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <div
+                          className="p-5 cursor-pointer transition-all group"
+                          style={{
+                            background: '#FFFFFF',
+                            border: '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.01)'
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
+                            e.currentTarget.style.borderColor = 'rgba(253,138,230,0.25)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
+                            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="flex-shrink-0 p-2.5 transition-all"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(253,138,230,0.15) 0%, rgba(199,125,255,0.15) 100%)',
+                                borderRadius: '10px',
+                                color: '#FD8AE6'
+                              }}
+                            >
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 
+                                className="font-semibold mb-1"
+                                style={{ 
+                                  fontSize: '15px',
+                                  color: '#0C0F1A',
+                                  fontFamily: 'var(--font-bricolage), sans-serif'
+                                }}
+                              >
+                                Priority Support
+                              </h4>
+                              <p style={{ fontSize: '13px', color: '#5E6370', lineHeight: '1.5' }}>
+                                Get faster responses from our support team
+                              </p>
+                            </div>
+                            <svg 
+                              className="w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              style={{ color: '#FD8AE6' }}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </a>
+
+                      {/* Email Templates */}
+                      <Link href="/dashboard/templates">
+                        <div
+                          className="p-5 cursor-pointer transition-all group"
+                          style={{
+                            background: '#FFFFFF',
+                            border: '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.01)'
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
+                            e.currentTarget.style.borderColor = 'rgba(253,138,230,0.25)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
+                            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="flex-shrink-0 p-2.5 transition-all"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(253,138,230,0.15) 0%, rgba(199,125,255,0.15) 100%)',
+                                borderRadius: '10px',
+                                color: '#FD8AE6'
+                              }}
+                            >
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 
+                                className="font-semibold mb-1"
+                                style={{ 
+                                  fontSize: '15px',
+                                  color: '#0C0F1A',
+                                  fontFamily: 'var(--font-bricolage), sans-serif'
+                                }}
+                              >
+                                Email Templates
+                              </h4>
+                              <p style={{ fontSize: '13px', color: '#5E6370', lineHeight: '1.5' }}>
+                                Pre-written pitch templates to save time
+                              </p>
+                            </div>
+                            <svg 
+                              className="w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              style={{ color: '#FD8AE6' }}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </Link>
+
+                      {/* Pipeline CRM */}
+                      <Link href="/dashboard/deals">
+                        <div
+                          className="p-5 cursor-pointer transition-all group"
+                          style={{
+                            background: '#FFFFFF',
+                            border: '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.04)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.01)'
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
+                            e.currentTarget.style.borderColor = 'rgba(253,138,230,0.25)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
+                            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="flex-shrink-0 p-2.5 transition-all"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(253,138,230,0.15) 0%, rgba(199,125,255,0.15) 100%)',
+                                borderRadius: '10px',
+                                color: '#FD8AE6'
+                              }}
+                            >
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 
+                                className="font-semibold mb-1"
+                                style={{ 
+                                  fontSize: '15px',
+                                  color: '#0C0F1A',
+                                  fontFamily: 'var(--font-bricolage), sans-serif'
+                                }}
+                              >
+                                Pipeline CRM
+                              </h4>
+                              <p style={{ fontSize: '13px', color: '#5E6370', lineHeight: '1.5' }}>
+                                Manage all your brand deals in one place
+                              </p>
+                            </div>
+                            <svg 
+                              className="w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              style={{ color: '#FD8AE6' }}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </Link>
                     </div>
 
                     {/* Manage Subscription */}
                     <div 
-                      className="p-5 rounded-xl"
+                      className="p-5"
                       style={{
                         background: '#F8F9FB',
-                        border: '1px solid rgba(0,0,0,0.06)'
+                        border: '1px solid rgba(0,0,0,0.06)',
+                        borderRadius: '16px'
                       }}
                     >
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 
                             className="font-semibold mb-1"
-                            style={{ fontSize: '14px', color: '#0C0F1A' }}
+                            style={{ 
+                              fontSize: '15px', 
+                              color: '#0C0F1A',
+                              fontFamily: 'var(--font-bricolage), sans-serif'
+                            }}
                           >
                             Manage Subscription
                           </h4>
@@ -1214,15 +1481,18 @@ export default function ProfilePage() {
                               background: '#0C0F1A',
                               color: '#FFFFFF',
                               borderRadius: '9999px',
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                              fontFamily: 'var(--font-libre), sans-serif'
                             }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
                               e.currentTarget.style.transform = 'translateY(-1px)'
+                              e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.background = '#0C0F1A'
                               e.currentTarget.style.transform = 'translateY(0)'
+                              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'
                             }}
                           >
                             Manage
@@ -1406,7 +1676,7 @@ export default function ProfilePage() {
                 transition={{ duration: 0.25, delay: 0.2, ease: 'easeOut' }}
                 className="bg-white p-6"
                 style={{
-                  borderRadius: '20px',
+                  borderRadius: '16px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
                   border: '1px solid rgba(0,0,0,0.06)',
                   background: 'linear-gradient(135deg, rgba(253,138,230,0.05) 0%, rgba(199,125,255,0.05) 100%)'
@@ -1433,15 +1703,16 @@ export default function ProfilePage() {
                       style={{
                         background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
                         borderRadius: '9999px',
-                        boxShadow: '0 4px 12px rgba(253,138,230,0.3)'
+                        boxShadow: '0 4px 12px rgba(253,138,230,0.2)',
+                        fontFamily: 'var(--font-libre), sans-serif'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'translateY(-2px)'
-                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(253,138,230,0.4)'
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(253,138,230,0.3)'
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'translateY(0)'
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(253,138,230,0.3)'
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(253,138,230,0.2)'
                       }}
                     >
                       Try Pro for $0
