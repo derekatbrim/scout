@@ -22,6 +22,7 @@ interface Profile {
   bio: string
   featured_image_url: string
   portfolio_items: any[]
+  subscription_tier: 'free' | 'pro' | 'premium' | 'trial'
   created_at: string
 }
 
@@ -40,7 +41,47 @@ interface ActionItem {
   field: keyof Profile
 }
 
-type TabType = 'work' | 'about'
+type TabType = 'work' | 'about' | 'pro-features'
+
+// Pro Badge Component
+const ProBadge = ({ tier }: { tier: 'pro' | 'premium' | 'trial' }) => {
+  const badgeConfig = {
+    pro: {
+      label: 'Pro',
+      gradient: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
+      textColor: '#FFFFFF'
+    },
+    premium: {
+      label: 'Premium',
+      gradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+      textColor: '#FFFFFF'
+    },
+    trial: {
+      label: 'Trial',
+      gradient: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
+      textColor: '#FFFFFF'
+    }
+  }
+
+  const config = badgeConfig[tier]
+
+  return (
+    <span
+      className="px-2.5 py-1 text-xs font-bold inline-flex items-center gap-1"
+      style={{
+        background: config.gradient,
+        color: config.textColor,
+        borderRadius: '6px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+      }}
+    >
+      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+      {config.label}
+    </span>
+  )
+}
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -91,6 +132,8 @@ export default function ProfilePage() {
     '1M+',
   ]
 
+  const isPro = profile?.subscription_tier === 'pro' || profile?.subscription_tier === 'premium' || profile?.subscription_tier === 'trial'
+
   const loadPortfolio = async (userId: string) => {
     setLoadingPortfolio(true)
     const { data, error } = await supabase
@@ -110,7 +153,7 @@ export default function ProfilePage() {
 
   const calculateCompletion = (prof: Profile, portfolioCount: number = 0) => {
     let completed = 0
-    const total = 10  // Increased from 7 to include portfolio milestones
+    const total = 10
 
     if (prof.full_name) completed++
     if (prof.instagram_handle) completed++
@@ -119,10 +162,9 @@ export default function ProfilePage() {
     if (prof.bio) completed++
     if (prof.featured_image_url) completed++
     
-    // Portfolio milestones
-    if (portfolioCount >= 1) completed++  // First upload
-    if (portfolioCount >= 3) completed++  // 3 items
-    if (portfolioCount >= 5) completed++  // 5 items (completionist!)
+    if (portfolioCount >= 1) completed++
+    if (portfolioCount >= 3) completed++
+    if (portfolioCount >= 5) completed++
 
     return Math.round((completed / total) * 100)
   }
@@ -389,7 +431,7 @@ export default function ProfilePage() {
         <div className="grid lg:grid-cols-3 gap-7">
           {/* Left Column - Main Content (2/3 width) */}
           <div className="lg:col-span-2 space-y-7">
-            {/* Hero Section - Contra Style */}
+            {/* Hero Section - Contra Style with Pro Badge */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -419,18 +461,22 @@ export default function ProfilePage() {
 
                 {/* Info Column */}
                 <div className="flex-1">
-                  <h1 
-                    className="mb-2"
-                    style={{ 
-                      fontSize: '40px',
-                      fontWeight: 'bold',
-                      color: '#0C0F1A',
-                      fontFamily: 'var(--font-bricolage), sans-serif',
-                      lineHeight: '1.2'
-                    }}
-                  >
-                    {profile?.full_name || 'Creator Name'}
-                  </h1>
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <h1 
+                      style={{ 
+                        fontSize: '40px',
+                        fontWeight: 'bold',
+                        color: '#0C0F1A',
+                        fontFamily: 'var(--font-bricolage), sans-serif',
+                        lineHeight: '1.2'
+                      }}
+                    >
+                      {profile?.full_name || 'Creator Name'}
+                    </h1>
+                    {isPro && profile && (
+                      <ProBadge tier={profile.subscription_tier as 'pro' | 'premium' | 'trial'} />
+                    )}
+                  </div>
                   <p 
                     className="mb-1"
                     style={{ 
@@ -578,6 +624,15 @@ export default function ProfilePage() {
                       </svg>
                     )
                   },
+                  ...(isPro ? [{ 
+                    id: 'pro-features' as TabType, 
+                    label: 'Pro Features',
+                    icon: (
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    )
+                  }] : []),
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -979,13 +1034,211 @@ export default function ProfilePage() {
                     )}
                   </div>
                 )}
+
+                {activeTab === 'pro-features' && isPro && (
+                  <div className="space-y-6">
+                    {/* Pro Status Banner */}
+                    <div 
+                      className="p-6 rounded-2xl"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(253,138,230,0.08) 0%, rgba(199,125,255,0.08) 100%)',
+                        border: '1px solid rgba(253,138,230,0.2)'
+                      }}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 
+                              className="font-bold"
+                              style={{ 
+                                fontSize: '20px', 
+                                color: '#0C0F1A',
+                                fontFamily: 'var(--font-bricolage), sans-serif'
+                              }}
+                            >
+                              You're on Scout Pro
+                            </h3>
+                            {profile && <ProBadge tier={profile.subscription_tier as 'pro' | 'premium' | 'trial'} />}
+                          </div>
+                          <p style={{ fontSize: '14px', color: '#5E6370' }}>
+                            Unlock unlimited brand access and advanced features
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pro Features Grid */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {[
+                        {
+                          icon: (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          ),
+                          title: 'Unlimited Brand Access',
+                          description: 'View all 200+ brand contacts without limits',
+                          active: true
+                        },
+                        {
+                          icon: (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          ),
+                          title: 'CSV Export',
+                          description: 'Export brand contacts to CSV for outreach',
+                          active: true
+                        },
+                        {
+                          icon: (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                          ),
+                          title: 'Priority Support',
+                          description: 'Get faster responses from our team',
+                          active: true
+                        },
+                        {
+                          icon: (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                          ),
+                          title: 'Advanced Analytics',
+                          description: 'Track your pitch success rates and earnings',
+                          active: false,
+                          comingSoon: true
+                        },
+                        {
+                          icon: (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          ),
+                          title: 'Featured in Search',
+                          description: 'Stand out when brands browse creators',
+                          active: false,
+                          comingSoon: true
+                        },
+                        {
+                          icon: (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                          ),
+                          title: 'Custom Profile URL',
+                          description: 'Get a branded profile link (scout.pro/yourname)',
+                          active: false,
+                          comingSoon: true
+                        },
+                      ].map((feature, idx) => (
+                        <div
+                          key={idx}
+                          className="p-5 transition-all"
+                          style={{
+                            background: feature.active ? '#F8F9FB' : 'rgba(248,249,251,0.5)',
+                            border: feature.active ? '1px solid rgba(0,0,0,0.06)' : '1px solid rgba(0,0,0,0.04)',
+                            borderRadius: '12px',
+                            opacity: feature.active ? 1 : 0.6
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="flex-shrink-0 p-2 rounded-lg"
+                              style={{
+                                background: feature.active ? 'linear-gradient(135deg, rgba(253,138,230,0.15) 0%, rgba(199,125,255,0.15) 100%)' : 'rgba(0,0,0,0.03)',
+                                color: feature.active ? '#FD8AE6' : '#9CA3AF'
+                              }}
+                            >
+                              {feature.icon}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 
+                                  className="font-semibold"
+                                  style={{ 
+                                    fontSize: '14px',
+                                    color: feature.active ? '#0C0F1A' : '#5E6370'
+                                  }}
+                                >
+                                  {feature.title}
+                                </h4>
+                                {feature.comingSoon && (
+                                  <span 
+                                    className="px-2 py-0.5 text-xs font-semibold"
+                                    style={{
+                                      background: 'rgba(59,130,246,0.1)',
+                                      color: '#3B82F6',
+                                      borderRadius: '6px'
+                                    }}
+                                  >
+                                    Soon
+                                  </span>
+                                )}
+                              </div>
+                              <p style={{ fontSize: '13px', color: '#5E6370', lineHeight: '1.5' }}>
+                                {feature.description}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Manage Subscription */}
+                    <div 
+                      className="p-5 rounded-xl"
+                      style={{
+                        background: '#F8F9FB',
+                        border: '1px solid rgba(0,0,0,0.06)'
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 
+                            className="font-semibold mb-1"
+                            style={{ fontSize: '14px', color: '#0C0F1A' }}
+                          >
+                            Manage Subscription
+                          </h4>
+                          <p style={{ fontSize: '13px', color: '#5E6370' }}>
+                            View billing details and update your plan
+                          </p>
+                        </div>
+                        <Link href="/dashboard/billing">
+                          <button
+                            className="px-5 py-2.5 text-sm font-semibold transition-all cursor-pointer"
+                            style={{
+                              background: '#0C0F1A',
+                              color: '#FFFFFF',
+                              borderRadius: '9999px',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)'
+                              e.currentTarget.style.transform = 'translateY(-1px)'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#0C0F1A'
+                              e.currentTarget.style.transform = 'translateY(0)'
+                            }}
+                          >
+                            Manage
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
 
           {/* Right Sidebar - Action Items */}
           <div className="space-y-7">
-            {/* Profile Completion - Contra Style */}
+            {/* Profile Completion */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1072,11 +1325,9 @@ export default function ProfilePage() {
                           setActiveTab('about')
                           setEditing(true)
                         } else if (item.field === 'featured_image_url') {
-                          // Scroll to top where profile picture is
                           window.scrollTo({ top: 0, behavior: 'smooth' })
                           showToast('Click on your profile picture to upload!', 'info')
                         } else if (item.field === 'portfolio_items') {
-                          // Open portfolio upload modal
                           setActiveTab('work')
                           setShowUploadModal(true)
                         } else {
@@ -1147,11 +1398,64 @@ export default function ProfilePage() {
               )}
             </motion.div>
 
+            {/* Pro Upgrade Card - Only show for free users */}
+            {!isPro && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: 0.2, ease: 'easeOut' }}
+                className="bg-white p-6"
+                style={{
+                  borderRadius: '20px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  background: 'linear-gradient(135deg, rgba(253,138,230,0.05) 0%, rgba(199,125,255,0.05) 100%)'
+                }}
+              >
+                <div className="text-center">
+                  <div className="text-3xl mb-3">⭐</div>
+                  <h3 
+                    className="font-bold mb-2"
+                    style={{ 
+                      fontSize: '16px', 
+                      color: '#0C0F1A',
+                      fontFamily: 'var(--font-bricolage), sans-serif'
+                    }}
+                  >
+                    Upgrade to Pro
+                  </h3>
+                  <p className="mb-4" style={{ fontSize: '13px', color: '#5E6370', lineHeight: '1.5' }}>
+                    Get unlimited brand access, CSV exports, and priority support
+                  </p>
+                  <Link href="/pricing">
+                    <button
+                      className="w-full px-5 py-3 text-sm font-semibold text-white transition-all cursor-pointer"
+                      style={{
+                        background: 'linear-gradient(135deg, #FD8AE6 0%, #C77DFF 100%)',
+                        borderRadius: '9999px',
+                        boxShadow: '0 4px 12px rgba(253,138,230,0.3)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(253,138,230,0.4)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(253,138,230,0.3)'
+                      }}
+                    >
+                      Try Pro for $0
+                    </button>
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+
             {/* Quick Links */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: 0.2, ease: 'easeOut' }}
+              transition={{ duration: 0.25, delay: 0.25, ease: 'easeOut' }}
               className="bg-white p-6"
               style={{
                 borderRadius: '20px',
